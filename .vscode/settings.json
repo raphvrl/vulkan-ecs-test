@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "log.h": "c",
+        "stdarg.h": "c",
+        "stdio.h": "c",
+        "window.h": "c",
+        "stdbool.h": "c",
+        "type.h": "c",
+        "glfw3.h": "c",
+        "mem.h": "c",
+        "instance.h": "c",
+        "vulkan_ctx.h": "c",
+        "vulkan_context.h": "c",
+        "vulkan_instance.h": "c",
+        "vulkan_validation.h": "c",
+        "vulkan.h": "c",
+        "chrono": "c",
+        "functional": "c",
+        "format": "c",
+        "cstdlib": "c",
+        "vulkan_device.h": "c"
+    }
+}
