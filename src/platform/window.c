@@ -7,7 +7,7 @@ window_t *window_create(int width, int height, const char *title)
 {
     window_t *window = malloc(sizeof(window_t));
     if (!window) {
-        ERROR("Failed to allocate memory for window");
+        LERROR("Failed to allocate memory for window");
         return NULL;
     }
 
@@ -16,7 +16,7 @@ window_t *window_create(int width, int height, const char *title)
     window->title = title;
 
     if (!glfwInit()) {
-        ERROR("Failed to initialize GLFW");
+        LERROR("Failed to initialize GLFW");
         free(window);
         return NULL;
     }
@@ -26,7 +26,7 @@ window_t *window_create(int width, int height, const char *title)
 
     window->handle = glfwCreateWindow(width, height, title, NULL, NULL);
     if (!window->handle) {
-        ERROR("Failed to create window");
+        LERROR("Failed to create window");
         free(window);
         return NULL;
     }

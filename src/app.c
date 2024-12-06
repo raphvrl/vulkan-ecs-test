@@ -1,6 +1,7 @@
 #include "platform/window.h"
-#include "renderer/vulkan/vulkan_context.h"
+#include "renderer/vulkan/vk_context.h"
 #include "core/log.h"
+#include "utils/consol.h"
 
 int main()
 {

@@ -3,8 +3,8 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
-#include "vulkan_validation.h"
-#include "vulkan_device.h"
+#include "vk_validation.h"
+#include "vk_device.h"
 
 typedef struct s_vulkan_ctx {
     VkInstance instance;

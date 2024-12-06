@@ -18,6 +18,15 @@
         "functional": "c",
         "format": "c",
         "cstdlib": "c",
-        "vulkan_device.h": "c"
+        "vulkan_device.h": "c",
+        "vk_instance.h": "c",
+        "vk_context.h": "c",
+        "box_drawer.h": "c",
+        "locale.h": "c",
+        "string.h": "c",
+        "windows.h": "c",
+        "time.h": "c",
+        "consol.h": "c",
+        "vk_validation.h": "c"
     }
 }

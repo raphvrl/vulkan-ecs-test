@@ -1,5 +1,5 @@
-#include "vulkan_validation.h"
-#include "vulkan_context.h"
+#include "vk_validation.h"
+#include "vk_context.h"
 #include "core/log.h"
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
@@ -19,13 +19,13 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
             LOG("Validation layer: %s", data->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            WARN("Validation layer: %s", data->pMessage);
+            WARNING("Validation layer: %s", data->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            ERROR("Validation layer: %s", data->pMessage);
+            LERROR("Validation layer: %s", data->pMessage);
             break;
         default:
-            WARN("Unknown severity: %s", data->pMessage);
+            WARNING("Validation layer: %s", data->pMessage);
             break;
     }
 
@@ -83,7 +83,7 @@ void vulkan_validation_create(vulkan_ctx_t *ctx)
     populate_debug_messenger_create_info(&create_info);
 
     if (create_debug_messenger(ctx->instance, &create_info, NULL, &ctx->callback) != VK_SUCCESS) {
-        WARN("Failed to create debug messenger");
+        WARNING("Failed to create debug messenger");
     }
 
     LOG("Debug messenger created");

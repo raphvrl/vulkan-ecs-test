@@ -34,7 +34,6 @@ GLFW_FLAGS += -DGLFW_BUILD_DOCS=OFF
 LDFLAGS += -L$(GLFW_LIB) -I$(GLFW_INC) -lglfw3 -lgdi32
 
 # vulkan
-VULKAN_SDK = C:/VulkanSDK/1.3.296.0
 VULKAN_LIB = $(VULKAN_SDK)/Lib
 VULKAN_INC = $(VULKAN_SDK)/Include
 LDFLAGS += -L$(VULKAN_LIB) -I$(VULKAN_INC) -lvulkan-1
@@ -62,7 +61,10 @@ glfw: submodule
 	@$(CMAKE) --build $(GLFW_BIN)
 
 clean:
-	@$(DEL) $(BIN_DIR) $(EXE)
+	@$(DEL) $(OBJ) $(DEP) $(EXE)
+
+clean-all: clean
+	@$(DEL) $(BIN_DIR)
 
 -include $(DEP)
 

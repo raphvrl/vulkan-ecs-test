@@ -1,5 +1,5 @@
-#include "vulkan_instance.h"
-#include "vulkan_validation.h"
+#include "vk_instance.h"
+#include "vk_validation.h"
 #include "core/type.h"
 #include "core/log.h"
 
@@ -21,7 +21,7 @@ static void set_extensions(vulkan_ctx_t *ctx, VkInstanceCreateInfo *create_info)
     u32 glfw_ext_count = 0;
     const char **glfw_exts = glfwGetRequiredInstanceExtensions(&glfw_ext_count);
     if (!glfw_exts) {
-        ERROR("Failed to get required GLFW extensions");
+        LERROR("Failed to get required GLFW extensions");
         return;
     }
 
@@ -69,7 +69,7 @@ static bool check_validation(vulkan_ctx_t *ctx)
 void vulkan_instance_create(vulkan_ctx_t *ctx)
 {
     if (ctx->validation.enable && !check_validation(ctx)) {
-        WARN("Validation layers requested but not available");
+        WARNING("Validation layers requested but not available");
     } else if (ctx->validation.enable) {
         LOG("Validation layers enabled");
     }
@@ -105,7 +105,7 @@ void vulkan_instance_create(vulkan_ctx_t *ctx)
 
     VkResult result = vkCreateInstance(&create_info, NULL, &ctx->instance);
     if (result != VK_SUCCESS) {
-        ERROR("Failed to create Vulkan instance (error: %d)", result);
+        LERROR("Failed to create Vulkan instance (error: %d)", result);
         return;
     }
 
@@ -114,6 +114,7 @@ void vulkan_instance_create(vulkan_ctx_t *ctx)
 
 void vulkan_instance_destroy(vulkan_ctx_t *ctx)
 {
+    UNUSED(ctx);
     vkDestroyInstance(ctx->instance, NULL);
     LOG("Vulkan instance destroyed");
 }

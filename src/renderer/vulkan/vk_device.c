@@ -1,5 +1,5 @@
-#include "vulkan_device.h"
-#include "vulkan_context.h"
+#include "vk_device.h"
+#include "vk_context.h"
 #include "core/log.h"
 
 static bool is_device_suitable(VkPhysicalDevice device)
@@ -59,7 +59,7 @@ void vulkan_physical_device_pick(vulkan_ctx_t *ctx)
     vkEnumeratePhysicalDevices(ctx->instance, &device_count, NULL);
 
     if (device_count == 0) {
-        ERROR("Failed to find GPUs with Vulkan support");
+        LERROR("Failed to find GPUs with Vulkan support");
         return;
     }
 
@@ -74,13 +74,13 @@ void vulkan_physical_device_pick(vulkan_ctx_t *ctx)
     }
 
     if (ctx->physical_device == VK_NULL_HANDLE) {
-        ERROR("Failed to find a suitable GPU");
+        LERROR("Failed to find a suitable GPU");
         return;
     }
 
     ctx->queue_families = find_queue_families(ctx->physical_device, ctx);
     if (!ctx->queue_families.graphics_family_found || !ctx->queue_families.present_family_found) {
-        ERROR("Failed to find queue families");
+        LERROR("Failed to find queue families");
         return;
     }
 
