@@ -3,18 +3,18 @@
 #include "core/type.h"
 #include "core/log.h"
 
-static void log_available_extensions()
-{
-    u32 ext_count = 0;
-    vkEnumerateInstanceExtensionProperties(NULL, &ext_count, NULL);
+// static void log_available_extensions()
+// {
+//     u32 ext_count = 0;
+//     vkEnumerateInstanceExtensionProperties(NULL, &ext_count, NULL);
 
-    VkExtensionProperties exts[ext_count];
-    vkEnumerateInstanceExtensionProperties(NULL, &ext_count, exts);
+//     VkExtensionProperties exts[ext_count];
+//     vkEnumerateInstanceExtensionProperties(NULL, &ext_count, exts);
 
-    for (u32 i = 0; i < ext_count; i++) {
-        LOG("Available extension: %s", exts[i].extensionName);
-    }
-}
+//     for (u32 i = 0; i < ext_count; i++) {
+//         LOG("Available extension: %s", exts[i].extensionName);
+//     }
+// }
 
 static void set_extensions(vulkan_ctx_t *ctx, VkInstanceCreateInfo *create_info)
 {
@@ -83,7 +83,7 @@ void vulkan_instance_create(vulkan_ctx_t *ctx)
         .apiVersion = VK_API_VERSION_1_0
     };
 
-    log_available_extensions();
+    // log_available_extensions();
 
     VkInstanceCreateInfo create_info = {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -114,7 +114,6 @@ void vulkan_instance_create(vulkan_ctx_t *ctx)
 
 void vulkan_instance_destroy(vulkan_ctx_t *ctx)
 {
-    UNUSED(ctx);
     vkDestroyInstance(ctx->instance, NULL);
     LOG("Vulkan instance destroyed");
 }

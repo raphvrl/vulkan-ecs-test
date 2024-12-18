@@ -5,6 +5,8 @@
 
 int main()
 {
+    set_save_log(true);
+
     window_t *window = window_create(800, 600, "Vulkan Test");
     if (!window) {
         return EXIT_FAILURE;

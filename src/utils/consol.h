@@ -10,15 +10,14 @@
 
 typedef enum color {
     COLOR_BLACK = 0,
-    COLOR_RED,
-    COLOR_GREEN,
-    COLOR_YELLOW,
     COLOR_BLUE,
-    COLOR_MAGENTA,
+    COLOR_GREEN,
     COLOR_CYAN,
+    COLOR_RED,
+    COLOR_YELLOW,
+    COLOR_MAGENTA,
     COLOR_WHITE
 } color_e;
-
 
 void consol_set_color(color_e color, bool bright);
 void consol_reset_color();

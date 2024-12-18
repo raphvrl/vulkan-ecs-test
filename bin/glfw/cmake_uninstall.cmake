@@ -1,9 +1,9 @@
 
-if (NOT EXISTS "E:/epitech/EPITECH-PRO/bin/glfw/install_manifest.txt")
-    message(FATAL_ERROR "Cannot find install manifest: \"E:/epitech/EPITECH-PRO/bin/glfw/install_manifest.txt\"")
+if (NOT EXISTS "C:/Users/rapha/Documents/EPITECH/EPITECH-PRO/bin/glfw/install_manifest.txt")
+    message(FATAL_ERROR "Cannot find install manifest: \"C:/Users/rapha/Documents/EPITECH/EPITECH-PRO/bin/glfw/install_manifest.txt\"")
 endif()
 
-file(READ "E:/epitech/EPITECH-PRO/bin/glfw/install_manifest.txt" files)
+file(READ "C:/Users/rapha/Documents/EPITECH/EPITECH-PRO/bin/glfw/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 
 foreach (file ${files})

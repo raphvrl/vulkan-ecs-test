@@ -1,6 +1,8 @@
 #include "log.h"
 
-void log_message(log_level_e level, const char *fmt, ...)
+bool g_save_log = false;
+
+static void consol_log(log_level_e level, const char *fmt, va_list args)
 {
     int width = consol_get_width() - 2;
 
@@ -10,13 +12,8 @@ void log_message(log_level_e level, const char *fmt, ...)
 
     strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", tm);
 
-    va_list args;
-    va_start(args, fmt);
-
     char buffer[LOG_BUFFER_SIZE];
     vsnprintf(buffer, LOG_BUFFER_SIZE, fmt, args);
-
-    va_end(args);
 
     const char *level_str = NULL;
 
@@ -64,4 +61,77 @@ void log_message(log_level_e level, const char *fmt, ...)
     consol_reset_color();
 
     printf("\n");
+}
+
+static void save_log(log_level_e level, const char *fmt, va_list args)
+{
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    char time_str[32];
+
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", tm);
+
+    char buffer[LOG_BUFFER_SIZE];
+    vsnprintf(buffer, LOG_BUFFER_SIZE, fmt, args);
+
+    const char *level_str = NULL;
+
+    switch (level) {
+        case LOG_DEBUG:
+            level_str = "DEBUG";
+            break;
+        
+        case LOG_INFO:
+            level_str = "INFO";
+            break;
+
+        case LOG_SUCCESS:   
+            level_str = "SUCCESS";
+            break;
+
+        case LOG_WARNING:
+            level_str = "WARNING";
+            break;
+
+        case LOG_ERROR:
+            level_str = "ERROR";
+            break;
+
+        default:
+            level_str = "UNKNOWN";
+            break;
+    }
+
+    // remove("log.txt");
+
+    FILE *file = fopen("log.txt", "a");
+
+    if (file) {
+        fprintf(file, "[%s] [%s]: %s\n", time_str, level_str, buffer);
+        fclose(file);
+    }
+}
+
+void log_message(log_level_e level, const char *fmt, ...)
+{
+    if (!g_save_log) {
+        va_list args;
+        va_start(args, fmt);
+
+        consol_log(level, fmt, args);
+
+        va_end(args);
+    } else {
+        va_list args;
+        va_start(args, fmt);
+
+        save_log(level, fmt, args);
+
+        va_end(args);
+    }
+}
+
+void set_save_log(bool enable)
+{
+    g_save_log = enable;
 }

@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <time.h>
 
 #include "utils/box_drawer.h"
@@ -29,6 +30,8 @@ typedef enum log_level {
 
 #define LOG_BUFFER_SIZE 1024
 
+extern bool g_save_log;
+
 // Log a message
 void log_message(log_level_e level, const char *fmt, ...);
 #define LOG(fmt, ...) log_message(LOG_INFO, fmt, ##__VA_ARGS__)
@@ -36,3 +39,5 @@ void log_message(log_level_e level, const char *fmt, ...);
 #define WARNING(fmt, ...) log_message(LOG_WARNING, fmt, ##__VA_ARGS__)
 #define LERROR(fmt, ...) log_message(LOG_ERROR, fmt, ##__VA_ARGS__)
 #define DEBUG(fmt, ...) log_message(LOG_DEBUG, fmt, ##__VA_ARGS__)
+
+void set_save_log(bool enable);

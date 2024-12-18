@@ -11,7 +11,8 @@ static bool is_device_suitable(VkPhysicalDevice device)
     vkGetPhysicalDeviceFeatures(device, &features);
 
     return props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-           features.geometryShader;
+            VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU &&
+            features.geometryShader;
 }
 
 static queue_family_indices_t find_queue_families(VkPhysicalDevice device, vulkan_ctx_t *ctx)
