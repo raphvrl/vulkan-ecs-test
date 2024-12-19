@@ -16,4 +16,14 @@ typedef struct s_queue_family_indices {
     bool present_family_found;
 } queue_family_indices_t;
 
+typedef struct s_vulkan_device {
+    VkPhysicalDevice physical_device;
+    VkDevice device;
+    queue_family_indices_t queue_families;
+    VkQueue graphics_queue;
+    VkQueue present_queue;
+} vulkan_device_t;
+
 void vulkan_physical_device_pick(vulkan_ctx_t *ctx);
+void vulkan_device_create(vulkan_ctx_t *ctx);
+void vulkan_device_destroy(vulkan_ctx_t *ctx);

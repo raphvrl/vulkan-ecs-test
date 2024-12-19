@@ -5,7 +5,7 @@
 
 int main()
 {
-    set_save_log(true);
+    set_save_log(false);
 
     window_t *window = window_create(800, 600, "Vulkan Test");
     if (!window) {

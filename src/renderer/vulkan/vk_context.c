@@ -69,12 +69,24 @@ vulkan_ctx_t *vulkan_ctx_create(GLFWwindow *window)
     vulkan_validation_create(ctx);
     vulkan_surface_create(ctx, window);
     vulkan_physical_device_pick(ctx);
+    vulkan_device_create(ctx);
+    vulkan_swapchain_create(ctx);
+    vulkan_image_view_create(ctx);
+    vulkan_renderpass_create(ctx);
+    vulkan_framebuffer_create(ctx);
+    vulkan_command_pool_create(ctx);
 
     return ctx;
 }
 
 void vulkan_ctx_destroy(vulkan_ctx_t *ctx)
 {
+    vulkan_command_pool_destroy(ctx);
+    vulkan_framebuffer_destroy(ctx);
+    vulkan_renderpass_destroy(ctx);
+    vulkan_image_view_destroy(ctx);
+    vulkan_swapchain_destroy(ctx);
+    vulkan_device_destroy(ctx);
     vulkan_surface_destroy(ctx);
     vulkan_validation_destroy(ctx);
     vulkan_instance_destroy(ctx);

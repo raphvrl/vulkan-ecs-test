@@ -37,8 +37,15 @@ LDFLAGS += -L$(GLFW_LIB) -I$(GLFW_INC) -lglfw3 -lopengl32 -lgdi32
 VULKAN_LIB = $(VULKAN_SDK)/Lib
 VULKAN_INC = $(VULKAN_SDK)/Include
 LDFLAGS += -L$(VULKAN_LIB) -I$(VULKAN_INC) -lvulkan-1
+GLSLC = $(VULKAN_SDK)/Bin/glslc.exe
 
-all: glfw $(EXE)
+# shader
+SHADER_DIR = shaders
+SHADER_SRC = $(shell find $(SHADER_DIR) -name '*.vert' -o -name '*.frag')
+SHADER_DST = $(patsubst $(SHADER_DIR)/%.vert, $(BIN_DIR)/%.vert.spv, $(SHADER_SRC)) \
+			 $(patsubst $(SHADER_DIR)/%.frag, $(BIN_DIR)/%.frag.spv, $(SHADER_SRC))
+
+all: glfw $(EXE) $(SHADER_DST)
 
 $(EXE): $(OBJ)
 	@$(PRINT) "Linking $@"
@@ -51,6 +58,14 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c | $(BIN_DIR)
 
 $(BIN_DIR):
 	@$(MKDIR) $@
+
+$(BIN_DIR)/%.vert.spv: $(SHADER_DIR)/%.vert | $(BIN_DIR)
+	@$(PRINT) "Compiling $<"
+	@$(GLSLC) $< -o $@
+
+$(BIN_DIR)/%.frag.spv: $(SHADER_DIR)/%.frag | $(BIN_DIR)
+	@$(PRINT) "Compiling $<"
+	@$(GLSLC) $< -o $@
 
 submodule:
 	@$(PRINT) "Initializing submodules"

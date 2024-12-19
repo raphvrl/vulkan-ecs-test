@@ -17,8 +17,10 @@ bin/renderer/vulkan/vk_context.o: src/renderer/vulkan/vk_context.c \
  C:\VulkanSDK\1.3.296.0/Include/vk_video/vulkan_video_codec_av1std.h \
  lib/glfw/include/GLFW/glfw3.h src/renderer/vulkan/vk_validation.h \
  src/core/type.h src/renderer/vulkan/vk_device.h \
- src/renderer/vulkan/vk_instance.h src/core/log.h src/utils/box_drawer.h \
- src/utils/consol.h src/core/mem.h
+ src/renderer/vulkan/vk_swapchain.h src/renderer/vulkan/vk_renderpass.h \
+ src/renderer/vulkan/vk_framebuffer.h \
+ src/renderer/vulkan/vk_command_pool.h src/renderer/vulkan/vk_instance.h \
+ src/core/log.h src/utils/box_drawer.h src/utils/consol.h src/core/mem.h
 src/renderer/vulkan/vk_context.h:
 C:\VulkanSDK\1.3.296.0/Include/vulkan/vulkan.h:
 C:\VulkanSDK\1.3.296.0/Include/vulkan/vk_platform.h:
@@ -39,6 +41,10 @@ lib/glfw/include/GLFW/glfw3.h:
 src/renderer/vulkan/vk_validation.h:
 src/core/type.h:
 src/renderer/vulkan/vk_device.h:
+src/renderer/vulkan/vk_swapchain.h:
+src/renderer/vulkan/vk_renderpass.h:
+src/renderer/vulkan/vk_framebuffer.h:
+src/renderer/vulkan/vk_command_pool.h:
 src/renderer/vulkan/vk_instance.h:
 src/core/log.h:
 src/utils/box_drawer.h:
