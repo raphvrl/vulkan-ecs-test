@@ -1,86 +1,131 @@
-CC = gcc
+ifdef MSYSTEM
+	CC = gcc
 
-# directory
+	RM = rm -rf
+	CP = cp
+	MKDIR = mkdir -p
+	PRINT = echo
+
+	TARGET = app.exe
+
+	CMAKE = cmake -G "MSYS Makefiles"
+	CMAKE_BUILD = cmake --build
+else ifeq ($(OS), Linux)
+	CC = gcc
+
+	RM = rm -rf
+	CP = cp
+	MKDIR = mkdir -p
+	PRINT = echo
+
+	TARGET = app
+
+	CMAKE = cmake -G "Unix Makefiles"
+	CMAKE_BUILD = cmake --build
+else
+	$(error "Unsupported OS")
+endif
+
 SRC_DIR = src
 BIN_DIR = bin
 LIB_DIR = lib
 
-# source
-SRC = $(shell find $(SRC_DIR) -name '*.c')
+SRC = $(shell find $(SRC_DIR) -name "*.c")
 OBJ = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRC))
 DEP = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.d, $(SRC))
 
-CFLAGS = -Wall -Wextra -Werror -I$(SRC_DIR)
-
 DEPFLAGS = -MMD -MP
+CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Werror
+CFLAGS += -I$(SRC_DIR)
 
-# output
-EXE = app
-
-# command
-PRINT = echo
-DEL = rm -rf
-MKDIR = mkdir -p
-
-CMAKE = cmake
-
-# glfw
-GLFW_DIR = $(LIB_DIR)/glfw
-GLFW_BIN = $(BIN_DIR)/glfw
-GLFW_LIB = $(GLFW_BIN)/src
-GLFW_INC = $(GLFW_DIR)/include
-GLFW_FLAGS += -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF
-GLFW_FLAGS += -DGLFW_BUILD_DOCS=OFF
-LDFLAGS += -L$(GLFW_LIB) -I$(GLFW_INC) -lglfw3 -lopengl32 -lgdi32
+LDFLAGS = -L$(LIB_DIR)
 
 # vulkan
-VULKAN_LIB = $(VULKAN_SDK)/Lib
-VULKAN_INC = $(VULKAN_SDK)/Include
-LDFLAGS += -L$(VULKAN_LIB) -I$(VULKAN_INC) -lvulkan-1
-GLSLC = $(VULKAN_SDK)/Bin/glslc.exe
+ifndef VULKAN_SDK
+	$(error "vulkan sdk not found")
+endif
+
+ifeq ($(OS), Windows_NT)
+	VULKAN_INC := $(VULKAN_SDK)/Include
+	VULKAN_LIB := $(VULKAN_SDK)/Lib
+	GLSLC := $(VULKAN_SDK)/Bin/glslc
+
+	LDFLAGS += -I$(VULKAN_INC) -L$(VULKAN_LIB) -lvulkan-1
+else ifeq ($(OS), Linux)
+	LDFLAGS += -lvulkan
+endif
+
+# glfw
+GLFW_DIR := $(LIB_DIR)/glfw
+GLFW_INC := $(GLFW_DIR)/include
+GLFW_BIN := $(BIN_DIR)/glfw
+GLFW_LIB := $(GLFW_BIN)/src
+GLFW_FLAGS += -DGLFW_BUILD_DOCS=OFF
+GLFW_FLAGS += -DGLFW_BUILD_TESTS=OFF
+GLFW_FLAGS += -DGLFW_BUILD_EXAMPLES=OFF
+
+LDFLAGS += -I$(GLFW_INC) -L$(GLFW_LIB) -lglfw3
+
+ifeq ($(OS), Windows_NT)
+	LDFLAGS += -lgdi32
+else ifeq ($(OS), Linux)
+	LDFLAGS += -lX11 -lXrandr -lXinerama -lXi -lXcursor
+endif
+
+# vma
+VMA_DIR := $(LIB_DIR)/vma
+VMA_INC := $(VMA_DIR)/include
+
+LDFLAGS += -I$(VMA_INC)
+
+# cglm
+GLM_DIR := $(LIB_DIR)/cglm
+GLM_INC := $(GLM_DIR)/include
+
+LDFLAGS += -I$(GLM_INC)
 
 # shader
-SHADER_DIR = shaders
-SHADER_SRC = $(shell find $(SHADER_DIR) -name '*.vert' -o -name '*.frag')
-SHADER_DST = $(patsubst $(SHADER_DIR)/%.vert, $(BIN_DIR)/%.vert.spv, $(SHADER_SRC)) \
-			 $(patsubst $(SHADER_DIR)/%.frag, $(BIN_DIR)/%.frag.spv, $(SHADER_SRC))
+SHADER_DIR := shaders
+SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
+SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(BIN_DIR)/%.vert.spv, $(SHADER_SRC))
+SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(BIN_DIR)/%.frag.spv, $(SHADER_SRC))
 
-all: glfw $(EXE) $(SHADER_DST)
 
-$(EXE): $(OBJ)
+all: $(GLFW_BIN) $(TARGET) $(SHADER_SPV)
+
+$(TARGET): $(OBJ)
 	@$(PRINT) "Linking $@"
-	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	@$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.c | $(BIN_DIR)
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.c
+	@$(PRINT) "Compiling $<"
 	@$(MKDIR) $(dir $@)
-	@$(PRINT) "Compiling $<"
-	@$(CC) $(CFLAGS) $(DEPFLAGS) -c -o $@ $< $(LDFLAGS)
-
-$(BIN_DIR):
-	@$(MKDIR) $@
-
-$(BIN_DIR)/%.vert.spv: $(SHADER_DIR)/%.vert | $(BIN_DIR)
-	@$(PRINT) "Compiling $<"
-	@$(GLSLC) $< -o $@
-
-$(BIN_DIR)/%.frag.spv: $(SHADER_DIR)/%.frag | $(BIN_DIR)
-	@$(PRINT) "Compiling $<"
-	@$(GLSLC) $< -o $@
-
-submodule:
-	@$(PRINT) "Initializing submodules"
-	@git submodule update --init --recursive
-
-glfw: submodule
-	@$(CMAKE) -S $(GLFW_DIR) -B $(GLFW_BIN) $(GLFW_FLAGS)
-	@$(CMAKE) --build $(GLFW_BIN)
-
-clean:
-	@$(DEL) $(OBJ) $(DEP) $(EXE)
-
-clean-all: clean
-	@$(DEL) $(BIN_DIR)
+	@$(CC) -c -o $@ $< $(CFLAGS) $(DEPFLAGS) $(LDFLAGS)
 
 -include $(DEP)
 
-.PHONY: all clean	
+$(BIN_DIR)/%.vert.spv: $(SHADER_DIR)/%.vert
+	@$(PRINT) "Compiling $<"
+	@$(MKDIR) $(dir $@)
+	@$(GLSLC) $< -o $@
+
+$(BIN_DIR)/%.frag.spv: $(SHADER_DIR)/%.frag
+	@$(PRINT) "Compiling $<"
+	@$(MKDIR) $(dir $@)
+	@$(GLSLC) $< -o $@
+
+$(GLFW_BIN):
+	@$(PRINT) "Building glfw"
+	@$(MKDIR) $(GLFW_BIN)
+	@$(CMAKE) -S $(GLFW_DIR) -B $(GLFW_BIN) $(GLFW_FLAGS)
+	@$(CMAKE_BUILD) $(GLFW_BIN)
+
+clean-all:
+	@$(PRINT) "Cleaning all"
+	@$(RM) $(BIN_DIR) $(TARGET)
+
+clean:
+	@$(PRINT) "Cleaning"
+	@$(RM) $(TARGET) $(OBJ) $(DEP)
+
+.PHONY: all clean clean-all

@@ -32,6 +32,13 @@
         "unistd.h": "c",
         "vk_pipeline.h": "c",
         "vk_framebuffer.h": "c",
-        "vk_renderpass.h": "c"
+        "vk_renderpass.h": "c",
+        "app.h": "c",
+        "types.h": "c",
+        "system_manager.h": "c",
+        "component_manager.h": "c",
+        "registry.h": "c",
+        "cmp_transform.h": "c",
+        "stdlib.h": "c"
     }
 }

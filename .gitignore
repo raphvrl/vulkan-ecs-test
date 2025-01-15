@@ -1,4 +1,9 @@
-bin/
+# binary
 app.exe
-app.out
-vscode/
+app
+
+# build
+bin/
+
+# vscode
+.vscode/

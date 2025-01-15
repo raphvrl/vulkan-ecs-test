@@ -1,26 +1,58 @@
-#include "platform/window.h"
-#include "renderer/vulkan/vk_context.h"
-#include "core/log.h"
-#include "utils/consol.h"
+#include "app.h"
+
+app_t *app_create(u32 w, u32 h, const char *title)
+{
+    app_t *app = malloc(sizeof(app_t));
+    if (!app) {
+        return NULL;
+    }
+
+    app->window = window_create(w, h, title);
+    if (!app->window) {
+        app_destroy(app);
+        return NULL;
+    }
+
+    app->registry = registry_create();
+    app->component_manager = component_manager_create();
+    app->system_manager = system_manager_create(
+        app->registry,
+        app->component_manager
+    );
+
+    return app;
+}
+
+void app_destroy(app_t *app)
+{
+    if (!app) {
+        return;
+    }
+
+    system_manager_destroy(app->system_manager);
+    component_manager_destroy(app->component_manager);
+    registry_destroy(app->registry);
+
+    window_destroy(app->window);
+    free(app);
+}
+
+void app_run(app_t *app)
+{
+    while (app->window->open) {
+        window_update(app->window);
+    }
+}
 
 int main()
 {
-    set_save_log(false);
-
-    window_t *window = window_create(800, 600, "Vulkan Test");
-    if (!window) {
-        return EXIT_FAILURE;
+    app_t *app = app_create(800, 600, "Hello Vulkan!");
+    if (!app) {
+        return 1;
     }
 
-    vulkan_ctx_t *vulkan_ctx = vulkan_ctx_create(window->handle);
+    app_run(app);
+    app_destroy(app);
 
-    while (window_is_open(window)) {
-        window_poll_events(window);
-    }
-
-    vulkan_ctx_destroy(vulkan_ctx);
-    window_destroy(window);
-    window_terminate();
-
-    return EXIT_SUCCESS;
+    return 0;
 }
