@@ -9,6 +9,9 @@ window_t *window_create(u32 w, u32 h, const char *title)
 
     win->width = w;
     win->height = h;
+    win->open = true;
+    win->last_time = glfwGetTime();
+    win->dt = 0.0f;
 
     if (glfwInit() != GLFW_TRUE) {
         window_destroy(win);
@@ -46,4 +49,8 @@ void window_update(window_t *win)
     glfwPollEvents();
 
     win->open = !glfwWindowShouldClose(win->handle);
+
+    f64 now = glfwGetTime();
+    win->dt = now - win->last_time;
+    win->last_time = now;
 }

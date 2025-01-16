@@ -41,6 +41,11 @@ void app_run(app_t *app)
 {
     while (app->window->open) {
         window_update(app->window);
+
+        system_manager_update(
+            app->system_manager,
+            app->window->dt
+        );
     }
 }
 

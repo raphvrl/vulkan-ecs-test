@@ -2,14 +2,12 @@
 
 registry_t *registry_create()
 {
-    return NULL;
-
     registry_t *registry = malloc(sizeof(registry_t));
     if (registry == NULL) {
         return NULL;
     }
 
-    registry->entities = NULL;
+    registry->entities = calloc(MAX_ENTITIES, sizeof(entity_t));
     registry->next_id = 0;
     registry->count = 0;
 

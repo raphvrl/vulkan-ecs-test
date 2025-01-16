@@ -4,6 +4,9 @@
 #include "ecs/registry.h"
 #include "ecs/components/component_manager.h"
 
+// systems
+#include "ecs/systems/physics/sys_physics.h"
+
 // main struct
 typedef struct system_manager {
     registry_t *registry;

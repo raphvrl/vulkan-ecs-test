@@ -58,7 +58,9 @@ bin/app.o: src/app.c src/app.h src/core/types.h \
  C:\VulkanSDK\1.3.296.0/Include/vk_video/vulkan_video_codec_av1std.h \
  src/ecs/systems/system_manager.h src/ecs/registry.h \
  src/ecs/components/component_manager.h \
- src/ecs/components/physics/cmp_transform.h
+ src/ecs/components/physics/cmp_transform.h \
+ src/ecs/components/physics/cmd_velocity.h \
+ src/ecs/systems/physics/sys_physics.h
 src/app.h:
 src/core/types.h:
 lib/cglm/include/cglm/cglm.h:
@@ -148,3 +150,5 @@ src/ecs/systems/system_manager.h:
 src/ecs/registry.h:
 src/ecs/components/component_manager.h:
 src/ecs/components/physics/cmp_transform.h:
+src/ecs/components/physics/cmd_velocity.h:
+src/ecs/systems/physics/sys_physics.h:

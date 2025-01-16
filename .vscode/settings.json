@@ -39,6 +39,7 @@
         "component_manager.h": "c",
         "registry.h": "c",
         "cmp_transform.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "sys_physics.h": "c"
     }
 }

@@ -7,10 +7,12 @@
 
 // component
 #include "physics/cmp_transform.h"
+#include "physics/cmd_velocity.h"
 
 // main struct
 typedef struct component_manager {
     cmp_transform_t *transforms;
+    cmp_velocity_t *velocities;
 } component_manager_t;
 
 // constructor and destructor

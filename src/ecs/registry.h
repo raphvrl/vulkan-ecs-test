@@ -6,7 +6,7 @@
 #include "core/types.h"
 
 // constants
-#define MAX_ENTITIES 1
+#define MAX_ENTITIES 300
 #define INVALID_ENTITY U32_MAX
 
 // entity

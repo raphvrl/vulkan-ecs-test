@@ -14,6 +14,9 @@ typedef struct window {
     u32 height;
 
     bool open;
+
+    f64 last_time;
+    f32 dt;
 } window_t;
 
 // constructor and destructor
