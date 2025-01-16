@@ -13,11 +13,15 @@ app_t *app_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
+    app->device = vk_device_create(app->window->handle);
+
     app->registry = registry_create();
     app->component_manager = component_manager_create();
     app->system_manager = system_manager_create(
         app->registry,
-        app->component_manager
+        app->component_manager,
+        app->window,
+        app->device
     );
 
     return app;
@@ -33,12 +37,17 @@ void app_destroy(app_t *app)
     component_manager_destroy(app->component_manager);
     registry_destroy(app->registry);
 
+    vk_device_destroy(app->device);
     window_destroy(app->window);
     free(app);
 }
 
 void app_run(app_t *app)
 {
+    u32 id = registry_create_entity(app->registry);
+    registry_add_component(app->registry, id, COMPONENT_TRANSFORM);
+    registry_add_component(app->registry, id, COMPONENT_VELOCITY);
+
     while (app->window->open) {
         window_update(app->window);
 

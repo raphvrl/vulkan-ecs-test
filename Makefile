@@ -90,6 +90,8 @@ SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(BIN_DIR)/%.vert.spv, $(SHADER_SRC))
 SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(BIN_DIR)/%.frag.spv, $(SHADER_SRC))
 
+# submodule
+SUBMODULES = $(LIB_DIR)/.submodules
 
 all: $(GLFW_BIN) $(TARGET) $(SHADER_SPV)
 
@@ -114,11 +116,16 @@ $(BIN_DIR)/%.frag.spv: $(SHADER_DIR)/%.frag
 	@$(MKDIR) $(dir $@)
 	@$(GLSLC) $< -o $@
 
-$(GLFW_BIN):
+$(GLFW_BIN): $(SUBMODULES)
 	@$(PRINT) "Building glfw"
 	@$(MKDIR) $(GLFW_BIN)
 	@$(CMAKE) -S $(GLFW_DIR) -B $(GLFW_BIN) $(GLFW_FLAGS)
 	@$(CMAKE_BUILD) $(GLFW_BIN)
+
+$(SUBMODULES):
+	@$(PRINT) "Initializing submodules"
+	@git submodule update --init --recursive
+	@touch $@
 
 clean-all:
 	@$(PRINT) "Cleaning all"

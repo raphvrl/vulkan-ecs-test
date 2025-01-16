@@ -2,7 +2,9 @@
 
 system_manager_t *system_manager_create(
     registry_t *registry,
-    component_manager_t *component_manager
+    component_manager_t *component_manager,
+    window_t *window,
+    vk_device_t *device
 )
 {
     system_manager_t *manager = malloc(sizeof(system_manager_t));
@@ -12,6 +14,8 @@ system_manager_t *system_manager_create(
 
     manager->registry = registry;
     manager->component_manager = component_manager;
+    manager->window = window;
+    manager->device = device;
 
     return manager;
 }
