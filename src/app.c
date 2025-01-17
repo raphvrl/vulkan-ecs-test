@@ -42,45 +42,6 @@ app_t *app_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
-    app->pipeline = vk_pipeline_create(
-        app->swapchain,
-        (vk_pipeline_info_t){
-            .vertex = "bin/default.vert.spv",
-            .fragment = "bin/default.frag.spv",
-            .input = {
-                .binding = {
-                    {
-                        .binding = 0,
-                        .stride = sizeof(vertex_t),
-                        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX
-                    }
-                },
-                .binding_count = 1,
-                .attribute = {
-                    {
-                        .location = 0,
-                        .binding = 0,
-                        .format = VK_FORMAT_R32G32B32_SFLOAT,
-                        .offset = offsetof(vertex_t, pos)
-                    },
-                    {
-                        .location = 1,
-                        .binding = 0,
-                        .format = VK_FORMAT_R32G32B32_SFLOAT,
-                        .offset = offsetof(vertex_t, normal)
-                    },
-                    {
-                        .location = 2,
-                        .binding = 0,
-                        .format = VK_FORMAT_R32G32_SFLOAT,
-                        .offset = offsetof(vertex_t, uv)
-                    }
-                },
-                .attribute_count = 3
-            }
-        }
-    );
-
     // cube vertices
     vertex_t vertices[] = {
         // Front face
@@ -133,13 +94,20 @@ app_t *app_create(u32 w, u32 h, const char *title)
         ARR_LEN(indices)
     );
 
+    if (!app->mesh) {
+        app_destroy(app);
+        return NULL;
+    }
+
+    app->pipeline_manager = pipeline_manager_create(app->swapchain);
+
     app->registry = registry_create();
     app->component_manager = component_manager_create();
     app->system_manager = system_manager_create(
         app->registry,
         app->component_manager,
         app->window,
-        app->device
+        app->pipeline_manager
     );
 
     return app;
@@ -151,9 +119,8 @@ void app_destroy(app_t *app)
         return;
     }
 
+    pipeline_manager_destroy(app->pipeline_manager);
     mesh_destroy(app->mesh);
-
-    vk_pipeline_destroy(app->pipeline);
 
     system_manager_destroy(app->system_manager);
     component_manager_destroy(app->component_manager);
@@ -169,7 +136,23 @@ void app_run(app_t *app)
 {
     u32 id = registry_create_entity(app->registry);
     registry_add_component(app->registry, id, COMPONENT_TRANSFORM);
-    registry_add_component(app->registry, id, COMPONENT_VELOCITY);
+    registry_add_component(app->registry, id, COMPONENT_MODEL);
+
+    cmp_transform_t *transform = &app->component_manager->transforms[id];
+    transform->position[0] = 0.0f;
+    transform->position[1] = 0.0f;
+    transform->position[2] = 0.0f;
+
+    transform->rotation[0] = 0.0f;
+    transform->rotation[1] = 0.0f;
+    transform->rotation[2] = 0.0f;
+
+    transform->scale[0] = 1.0f;
+    transform->scale[1] = 1.0f;
+    transform->scale[2] = 1.0f;
+
+    cmp_model_t *model = &app->component_manager->models[id];
+    model->mesh = app->mesh;
 
     while (app->window->open) {
         window_update(app->window);
@@ -178,15 +161,6 @@ void app_run(app_t *app)
             app->system_manager,
             app->window->dt
         );
-
-        begin_frame(app->swapchain);
-
-        vk_pipeline_bind(app->pipeline);
-
-        mesh_bind(app->mesh);
-        mesh_draw(app->mesh);
-
-        end_frame(app->swapchain);
     }
 }
 

@@ -43,6 +43,12 @@
         "sys_physics.h": "c",
         "vk_device.h": "c",
         "cmath": "cpp",
-        "console.h": "c"
+        "console.h": "c",
+        "cmp_velocity.h": "c",
+        "pipeline_manager.h": "c",
+        "sys_render.h": "c",
+        "logger.h": "c",
+        "text_encoding": "c",
+        "thread": "c"
     }
 }

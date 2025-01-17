@@ -135,8 +135,10 @@ void mesh_bind(mesh_t *mesh)
 
 void mesh_draw(mesh_t *mesh)
 {
+    vk_swapchain_t *swapchain = mesh->swapchain;
+
     vkCmdDrawIndexed(
-        mesh->swapchain->command_buffers[mesh->swapchain->image_index],
+        swapchain->command_buffers[swapchain->image_index],
         mesh->index_count,
         1,
         0,

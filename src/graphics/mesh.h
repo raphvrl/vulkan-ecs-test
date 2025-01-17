@@ -39,5 +39,6 @@ void mesh_destroy(mesh_t *mesh);
 void mesh_bind(mesh_t *mesh);
 void mesh_draw(mesh_t *mesh);
 
+// helpers
 VkVertexInputBindingDescription mesh_get_binding_description();
 VkVertexInputAttributeDescription *mesh_get_attribute_descriptions();

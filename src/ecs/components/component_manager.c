@@ -9,6 +9,7 @@ component_manager_t *component_manager_create()
 
     manager->transforms = calloc(MAX_ENTITIES, sizeof(cmp_transform_t));
     manager->velocities = calloc(MAX_ENTITIES, sizeof(cmp_velocity_t));
+    manager->models = calloc(MAX_ENTITIES, sizeof(cmp_model_t));
 
     if (!manager->transforms || !manager->velocities) {
         component_manager_destroy(manager);
@@ -22,6 +23,7 @@ void component_manager_destroy(component_manager_t *manager)
 {
     if (manager == NULL) { return; }
 
+    free(manager->models);
     free(manager->transforms);
     free(manager->velocities);
     free(manager);
