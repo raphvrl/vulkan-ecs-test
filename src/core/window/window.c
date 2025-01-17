@@ -19,7 +19,7 @@ window_t *window_create(u32 w, u32 h, const char *title)
     }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     win->handle = glfwCreateWindow(w, h, title, NULL, NULL);
     if (!win->handle) {

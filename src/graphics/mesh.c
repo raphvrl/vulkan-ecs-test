@@ -1,0 +1,178 @@
+#include "mesh.h"
+
+mesh_t *mesh_create(
+    vk_swapchain_t *swapchain,
+    vertex_t *vertices,
+    u32 vertex_count,
+    u32 *indices,
+    u32 index_count
+) {
+    mesh_t *mesh = malloc(sizeof(mesh_t));
+    if (!mesh) {
+        return NULL;
+    }
+
+    mesh->swapchain = swapchain;
+
+    mesh->vertex_count = vertex_count;
+    mesh->index_count = index_count;
+
+    VkDeviceSize vertex_buffer_size = sizeof(vertex_t) * vertex_count;
+    VkDeviceSize index_buffer_size = sizeof(u32) * index_count;
+
+    vk_buffer_t *staging_vertex_buffer = vk_buffer_create(
+        swapchain->device,
+        vertex_buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    vk_buffer_t *staging_index_buffer = vk_buffer_create(
+        swapchain->device,
+        index_buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    void *data;
+    vkMapMemory(
+        swapchain->device->device,
+        staging_vertex_buffer->memory,
+        0,
+        vertex_buffer_size,
+        0,
+        &data
+    );
+    memcpy(data, vertices, vertex_buffer_size);
+    vkUnmapMemory(swapchain->device->device, staging_vertex_buffer->memory);
+
+    vkMapMemory(
+        swapchain->device->device,
+        staging_index_buffer->memory,
+        0,
+        index_buffer_size,
+        0,
+        &data
+    );
+    memcpy(data, indices, index_buffer_size);
+    vkUnmapMemory(swapchain->device->device, staging_index_buffer->memory);
+
+    mesh->vertex_buffer = vk_buffer_create(
+        swapchain->device,
+        vertex_buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
+
+    mesh->index_buffer = vk_buffer_create(
+        swapchain->device,
+        index_buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
+
+    vk_buffer_copy(
+        swapchain->device,
+        staging_vertex_buffer->handle,
+        mesh->vertex_buffer->handle,
+        vertex_buffer_size
+    );
+
+    vk_buffer_copy(
+        swapchain->device,
+        staging_index_buffer->handle,
+        mesh->index_buffer->handle,
+        index_buffer_size
+    );
+
+    vk_buffer_destroy(swapchain->device, staging_vertex_buffer);
+    vk_buffer_destroy(swapchain->device, staging_index_buffer);
+
+    mesh->binding_description = mesh_get_binding_description();
+    memcpy(
+        mesh->attribute_descriptions,
+        mesh_get_attribute_descriptions(),
+        sizeof(mesh->attribute_descriptions)
+    );
+
+    return mesh;
+}
+
+void mesh_destroy(mesh_t *mesh)
+{
+    if (!mesh) {
+        return;
+    }
+
+    vk_device_t *device = mesh->swapchain->device;
+
+    vkDeviceWaitIdle(device->device);
+
+    vk_buffer_destroy(device, mesh->vertex_buffer);
+    vk_buffer_destroy(device, mesh->index_buffer);
+    free(mesh);
+}
+
+void mesh_bind(mesh_t *mesh)
+{
+    VkBuffer vertex_buffers[] = {mesh->vertex_buffer->handle};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(
+        mesh->swapchain->command_buffers[mesh->swapchain->image_index],
+        0,
+        1,
+        vertex_buffers,
+        offsets
+    );
+
+    vkCmdBindIndexBuffer(
+        mesh->swapchain->command_buffers[mesh->swapchain->image_index],
+        mesh->index_buffer->handle,
+        0,
+        VK_INDEX_TYPE_UINT32
+    );
+}
+
+void mesh_draw(mesh_t *mesh)
+{
+    vkCmdDrawIndexed(
+        mesh->swapchain->command_buffers[mesh->swapchain->image_index],
+        mesh->index_count,
+        1,
+        0,
+        0,
+        0
+    );
+}
+
+VkVertexInputBindingDescription mesh_get_binding_description()
+{
+    VkVertexInputBindingDescription binding_description = {0};
+    binding_description.binding = 0;
+    binding_description.stride = sizeof(vertex_t);
+    binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    return binding_description;
+}
+
+VkVertexInputAttributeDescription *mesh_get_attribute_descriptions()
+{
+    static VkVertexInputAttributeDescription attribute_descriptions[3] = {0};
+
+    attribute_descriptions[0].binding = 0;
+    attribute_descriptions[0].location = 0;
+    attribute_descriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attribute_descriptions[0].offset = offsetof(vertex_t, pos);
+
+    attribute_descriptions[1].binding = 0;
+    attribute_descriptions[1].location = 1;
+    attribute_descriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attribute_descriptions[1].offset = offsetof(vertex_t, normal);
+
+    attribute_descriptions[2].binding = 0;
+    attribute_descriptions[2].location = 2;
+    attribute_descriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+    attribute_descriptions[2].offset = offsetof(vertex_t, uv);
+
+    return attribute_descriptions;
+}

@@ -41,6 +41,8 @@
         "cmp_transform.h": "c",
         "stdlib.h": "c",
         "sys_physics.h": "c",
-        "vk_device.h": "c"
+        "vk_device.h": "c",
+        "cmath": "cpp",
+        "console.h": "c"
     }
 }

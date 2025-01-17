@@ -5,6 +5,16 @@
 #include "core/types.h"
 #include "vk_device.h"
 
+typedef struct swapchain_support_details {
+    VkSurfaceCapabilitiesKHR capabilities;
+    VkSurfaceFormatKHR *formats;
+    VkPresentModeKHR *present_modes;
+    u32 format_count;
+    u32 present_mode_count;
+} swapchain_support_details_t;
+
+#define MAX_FRAMES_IN_FLIGHT 2
+
 // main struct
 typedef struct vk_swapchain {
     vk_device_t *device;
@@ -22,11 +32,18 @@ typedef struct vk_swapchain {
     VkCommandPool command_pool;
     VkCommandBuffer *command_buffers;
 
-    VkSemaphore image_available;
-    VkSemaphore render_finished;
+    VkSemaphore *image_available;
+    VkSemaphore *render_finished;
     VkFence *in_flight_fences;
+
+    u32 current_frame;
+    u32 image_index;
 } vk_swapchain_t;
 
 // constructor and destructor
 vk_swapchain_t *vk_swapchain_create(vk_device_t *device);
 void vk_swapchain_destroy(vk_swapchain_t *swapchain);
+
+// actions
+void begin_frame(vk_swapchain_t *swapchain);
+void end_frame(vk_swapchain_t *swapchain);

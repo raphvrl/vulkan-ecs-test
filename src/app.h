@@ -6,17 +6,22 @@
 #include "ecs/components/component_manager.h"
 #include "ecs/registry.h"
 #include "graphics/vulkan/vk_device.h"
+#include "graphics/vulkan/vk_swapchain.h"
+#include "graphics/vulkan/vk_pipeline.h"
+#include "graphics/mesh.h"
 
 // main struct
 typedef struct app {
     window_t *window;
     vk_device_t *device;
+    vk_swapchain_t *swapchain;
+    vk_pipeline_t *pipeline;
+    mesh_t *mesh;
+
 
     registry_t *registry;
     component_manager_t *component_manager;
     system_manager_t *system_manager;
-
-    
 } app_t;
 
 // constructor and destructor

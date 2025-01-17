@@ -72,12 +72,6 @@ else ifeq ($(OS), Linux)
 	LDFLAGS += -lX11 -lXrandr -lXinerama -lXi -lXcursor
 endif
 
-# vma
-VMA_DIR := $(LIB_DIR)/vma
-VMA_INC := $(VMA_DIR)/include
-
-LDFLAGS += -I$(VMA_INC)
-
 # cglm
 GLM_DIR := $(LIB_DIR)/cglm
 GLM_INC := $(GLM_DIR)/include
