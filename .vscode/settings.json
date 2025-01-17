@@ -49,6 +49,7 @@
         "sys_render.h": "c",
         "logger.h": "c",
         "text_encoding": "c",
-        "thread": "c"
+        "thread": "c",
+        "ecs.h": "c"
     }
 }

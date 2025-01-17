@@ -2,7 +2,7 @@
 
 #include "core/types.h"
 #include "core/window/window.h"
-#include "ecs/systems/system_manager.h"
+#include "ecs/ecs.h"
 #include "ecs/components/component_manager.h"
 #include "ecs/registry.h"
 #include "graphics/vulkan/vk_device.h"
@@ -22,7 +22,7 @@ typedef struct app {
 
     registry_t *registry;
     component_manager_t *component_manager;
-    system_manager_t *system_manager;
+    ecs_t *ecs;
 } app_t;
 
 // constructor and destructor

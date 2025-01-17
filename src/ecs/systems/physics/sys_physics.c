@@ -1,10 +1,10 @@
 #include "sys_physics.h"
-#include "ecs/systems/system_manager.h"
+#include "ecs/ecs.h"
 
-void sys_physics_update(system_manager_t *manager, f32 dt)
+void sys_physics_update(ecs_t *ecs, f32 dt)
 {
-    registry_t *registry = manager->registry;
-    component_manager_t *component_manager = manager->component_manager;
+    registry_t *registry = ecs->registry;
+    component_manager_t *component_manager = ecs->component_manager;
 
     for (u32 i = 0; i < MAX_ENTITIES; i++) {
         if (!registry->entities[i].active) { continue; }

@@ -103,11 +103,13 @@ app_t *app_create(u32 w, u32 h, const char *title)
 
     app->registry = registry_create();
     app->component_manager = component_manager_create();
-    app->system_manager = system_manager_create(
-        app->registry,
-        app->component_manager,
-        app->window,
-        app->pipeline_manager
+    app->ecs = ecs_create(
+        &(ecs_info_t){
+            .registry = app->registry,
+            .component_manager = app->component_manager,
+            .window = app->window,
+            .pipeline_manager = app->pipeline_manager
+        }
     );
 
     return app;
@@ -122,7 +124,7 @@ void app_destroy(app_t *app)
     pipeline_manager_destroy(app->pipeline_manager);
     mesh_destroy(app->mesh);
 
-    system_manager_destroy(app->system_manager);
+    ecs_destroy(app->ecs);
     component_manager_destroy(app->component_manager);
     registry_destroy(app->registry);
 
@@ -157,8 +159,8 @@ void app_run(app_t *app)
     while (app->window->open) {
         window_update(app->window);
 
-        system_manager_update(
-            app->system_manager,
+        ecs_update(
+            app->ecs,
             app->window->dt
         );
     }

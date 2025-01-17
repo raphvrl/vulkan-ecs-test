@@ -3,8 +3,8 @@
 #include "core/types.h"
 
 // forward declarations
-typedef struct system_manager system_manager_t;
+typedef struct ecs ecs_t;
 
 // action
-void sys_physics_update(system_manager_t *manager, f32 dt);
+void sys_physics_update(ecs_t *ecs, f32 dt);
 

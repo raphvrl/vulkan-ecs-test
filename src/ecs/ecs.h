@@ -10,24 +10,27 @@
 #include "ecs/systems/physics/sys_physics.h"
 #include "ecs/systems/render/sys_render.h"
 
+// info struct
+typedef struct ecs_info {
+    registry_t *registry;
+    component_manager_t *component_manager;
+    window_t *window;
+    pipeline_manager_t *pipeline_manager;
+} ecs_info_t;
+
 // main struct
-typedef struct system_manager {
+typedef struct ecs {
     registry_t *registry;
     component_manager_t *component_manager;
 
     window_t *window;
     pipeline_manager_t *pipeline_manager;
-} system_manager_t;
+} ecs_t;
 
 // constructor and destructor
-system_manager_t *system_manager_create(
-    registry_t *registry,
-    component_manager_t *component_manager,
-    window_t *window,
-    pipeline_manager_t *pipeline_manager
-);
+ecs_t *ecs_create(ecs_info_t *info);
 
-void system_manager_destroy(system_manager_t *manager);
+void ecs_destroy(ecs_t *ecs);
 
 // actions
-void system_manager_update(system_manager_t *manager, f32 dt);
+void ecs_update(ecs_t *ecs, f32 dt);

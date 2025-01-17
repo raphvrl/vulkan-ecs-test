@@ -1,13 +1,13 @@
 #include "sys_render.h"
-#include "ecs/systems/system_manager.h"
+#include "ecs/ecs.h"
 
-void sys_render_update(system_manager_t *manager, f32 dt)
+void sys_render_update(ecs_t *ecs, f32 dt)
 {
     UNUSED(dt);
 
-    registry_t *registry = manager->registry;
-    component_manager_t *component_manager = manager->component_manager;
-    pipeline_manager_t *pipeline_manager = manager->pipeline_manager;
+    registry_t *registry = ecs->registry;
+    component_manager_t *component_manager = ecs->component_manager;
+    pipeline_manager_t *pipeline_manager = ecs->pipeline_manager;
     vk_swapchain_t *swapchain = pipeline_manager->swapchain;
 
     begin_frame(swapchain);
