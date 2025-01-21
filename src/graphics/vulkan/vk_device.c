@@ -153,11 +153,11 @@ static void pick_physical_device(vk_device_t *device)
     free(devices);
 }
 
-static void create_surface(vk_device_t *device, GLFWwindow *window)
+static void create_surface(vk_device_t *device)
 {
     VkResult res = glfwCreateWindowSurface(
         device->instance,
-        window,
+        device->window->handle,
         NULL,
         &device->surface
     );
@@ -340,7 +340,7 @@ static void create_instance(vk_device_t *device)
     }
 }
 
-vk_device_t *vk_device_create(GLFWwindow *window)
+vk_device_t *vk_device_create(window_t *window)
 {
     if (!glfwVulkanSupported()) {
         LOG_ERROR("GLFW Vulkan not supported!");
@@ -352,13 +352,13 @@ vk_device_t *vk_device_create(GLFWwindow *window)
         return NULL;
     }
 
+    device->window = window;
+
     create_instance(device);
     setup_debug_messenger(device);
-    create_surface(device, window);
+    create_surface(device);
     pick_physical_device(device);
     create_logical_device(device);
-
-    device->window = window;
 
     return device;
 }

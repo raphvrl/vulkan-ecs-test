@@ -272,9 +272,7 @@ static void create_swapchain(vk_swapchain_t *swapchain)
     }
 
     int width, height;
-    glfwGetFramebufferSize(device->window, &width, &height);
-
-    printf("Width: %d, Height: %d\n", width, height);
+    glfwGetFramebufferSize(device->window->handle, &width, &height);
 
     VkExtent2D extent = {0};
     if (details.capabilities.currentExtent.width != UINT32_MAX) {
@@ -454,9 +452,9 @@ static void recreate_swapchain(vk_swapchain_t *swapchain)
     vkDeviceWaitIdle(device->device);
 
     int width, height;
-    glfwGetFramebufferSize(device->window, &width, &height);
+    glfwGetFramebufferSize(device->window->handle, &width, &height);
     while (width == 0 || height == 0) {
-        glfwGetFramebufferSize(device->window, &width, &height);
+        glfwGetFramebufferSize(device->window->handle, &width, &height);
         glfwWaitEvents();
     }
 
@@ -495,8 +493,11 @@ void begin_frame(vk_swapchain_t *swapchain)
     );
     u32 image_index = swapchain->image_index;
 
-    if (res == VK_ERROR_OUT_OF_DATE_KHR) {
-        LOG_INFO("Recreating swapchain...");
+    if (
+        res == VK_ERROR_OUT_OF_DATE_KHR ||
+        res == VK_SUBOPTIMAL_KHR
+    ) {
+        device->window->resized = false;
         recreate_swapchain(swapchain);
         return;
     } else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
@@ -617,8 +618,12 @@ void end_frame(vk_swapchain_t *swapchain)
 
     res = vkQueuePresentKHR(swapchain->device->present_queue, &present_info);
 
-    if (res == VK_ERROR_OUT_OF_DATE_KHR || res == VK_SUBOPTIMAL_KHR) {
-        LOG_INFO("Recreating swapchain...");
+    if (
+        res == VK_ERROR_OUT_OF_DATE_KHR ||
+        res == VK_SUBOPTIMAL_KHR ||
+        device->window->resized
+    ) {
+        device->window->resized = false;
         recreate_swapchain(swapchain);
     } else if (res != VK_SUCCESS) {
         LOG_ERROR("Failed to present swapchain image!");

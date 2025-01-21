@@ -30,7 +30,7 @@ app_t *app_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
-    app->device = vk_device_create(app->window->handle);
+    app->device = vk_device_create(app->window);
     if (!app->device) {
         app_destroy(app);
         return NULL;

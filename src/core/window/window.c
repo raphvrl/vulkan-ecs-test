@@ -9,6 +9,7 @@ static void resize_callback(GLFWwindow *window, int width, int height)
 
     win->width = width;
     win->height = height;
+    win->resized = true;
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -73,6 +74,8 @@ window_t *window_create(u32 w, u32 h, const char *title)
 
     win->rx = 0.0f;
     win->ry = 0.0f;
+
+    win->resized = false;
 
     if (glfwInit() != GLFW_TRUE) {
         window_destroy(win);

@@ -35,6 +35,9 @@ typedef struct window {
     // mouse delta
     f32 rx;
     f32 ry;
+
+    // resize
+    bool resized;
 } window_t;
 
 // key enum
@@ -174,6 +177,7 @@ typedef enum mouse {
     M_BUTTON_8 = GLFW_MOUSE_BUTTON_8
 } mouse_e;
 
+// mouse defines
 #define M_BUTTON_LEFT M_BUTTON_1
 #define M_BUTTON_RIGHT M_BUTTON_2
 #define M_BUTTON_MIDDLE M_BUTTON_3
