@@ -78,6 +78,12 @@ GLM_INC := $(GLM_DIR)/include
 
 LDFLAGS += -I$(GLM_INC)
 
+# stb
+STB_DIR := $(LIB_DIR)/stb
+STB_INC := $(STB_DIR)
+
+LDFLAGS += -I$(STB_INC)
+
 # shader
 SHADER_DIR := shaders
 SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")

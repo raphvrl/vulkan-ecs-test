@@ -90,7 +90,7 @@ vk_pipeline_t *vk_pipeline_create(
 
     VkDynamicState dynamic_states[] = {
         VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_LINE_WIDTH
+        VK_DYNAMIC_STATE_SCISSOR
     };
 
     VkPipelineDynamicStateCreateInfo dynamic_state = {0};
@@ -232,9 +232,10 @@ void vk_pipeline_destroy(vk_pipeline_t *pipeline)
 void vk_pipeline_bind(vk_pipeline_t *pipeline)
 {
     vk_swapchain_t *swapchain = pipeline->swapchain;
+    VkCommandBuffer command_buffer = swapchain->command_buffers[swapchain->image_index];
 
     vkCmdBindPipeline(
-        swapchain->command_buffers[swapchain->image_index],
+        command_buffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipeline->handle
     );

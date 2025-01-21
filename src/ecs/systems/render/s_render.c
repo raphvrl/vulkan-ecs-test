@@ -2,9 +2,6 @@
 
 static void draw_mesh(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
 {
-    static float rotation = 0.0f;
-    rotation += 0.0005f;
-
     m4 view = GLM_MAT4_IDENTITY_INIT;
     m4 proj = GLM_MAT4_IDENTITY_INIT;
 
@@ -34,7 +31,25 @@ static void draw_mesh(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
             m4 mvp = GLM_MAT4_IDENTITY_INIT;
 
             glm_translate(model_matrix, transform->pos);
-            glm_rotate(model_matrix, rotation, (vec3){0.5f, 1.0f, 0.5f});
+            glm_rotate(
+                model_matrix,
+                glm_rad(transform->rotate[0]),
+                (v3){1.0f, 0.0f, 0.0f}
+            );
+
+            glm_rotate(
+                model_matrix,
+                glm_rad(transform->rotate[1]),
+                (v3){0.0f, 1.0f, 0.0f}
+            );
+
+            glm_rotate(
+                model_matrix,
+                glm_rad(transform->rotate[2]),
+                (v3){0.0f, 0.0f, 1.0f}
+            );
+
+            glm_scale(model_matrix, transform->scale);
 
             glm_mat4_mul(proj, view, mvp);
             glm_mat4_mul(mvp, model_matrix, mvp);
@@ -64,7 +79,7 @@ void s_render_tick(ecs_t *ecs, f32 dt)
     pipeline_manager_t *pipeline_manager = ecs->pipeline_manager;
     vk_swapchain_t *swapchain = pipeline_manager->swapchain;
 
-    begin_frame(swapchain);
+    if (!begin_frame(swapchain)) { return; };
 
     draw_mesh(ecs, pipeline_manager);
 

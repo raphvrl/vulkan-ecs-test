@@ -7,7 +7,7 @@ static void create_vertex_buffer(
 ) {
     VkDeviceSize buffer_size = sizeof(vertex_t) * vertex_count;
 
-    vk_buffer_t *staging_buffer = vk_buffer_create(
+    vk_buffer_t *staging = vk_buffer_create(
         mesh->swapchain->device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -17,14 +17,14 @@ static void create_vertex_buffer(
     void *data;
     vkMapMemory(
         mesh->swapchain->device->device,
-        staging_buffer->memory,
+        staging->memory,
         0,
         buffer_size,
         0,
         &data
     );
     memcpy(data, vertices, buffer_size);
-    vkUnmapMemory(mesh->swapchain->device->device, staging_buffer->memory);
+    vkUnmapMemory(mesh->swapchain->device->device, staging->memory);
 
     mesh->vertex_buffer = vk_buffer_create(
         mesh->swapchain->device,
@@ -35,12 +35,12 @@ static void create_vertex_buffer(
 
     vk_buffer_copy(
         mesh->swapchain->device,
-        staging_buffer->handle,
+        staging->handle,
         mesh->vertex_buffer->handle,
         buffer_size
     );
 
-    vk_buffer_destroy(mesh->swapchain->device, staging_buffer);
+    vk_buffer_destroy(staging);
 }
 
 static void create_index_buffer(
@@ -50,7 +50,7 @@ static void create_index_buffer(
 ) {
     VkDeviceSize buffer_size = sizeof(u32) * index_count;
 
-    vk_buffer_t *staging_buffer = vk_buffer_create(
+    vk_buffer_t *staging = vk_buffer_create(
         mesh->swapchain->device,
         buffer_size,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -60,14 +60,14 @@ static void create_index_buffer(
     void *data;
     vkMapMemory(
         mesh->swapchain->device->device,
-        staging_buffer->memory,
+        staging->memory,
         0,
         buffer_size,
         0,
         &data
     );
     memcpy(data, indices, buffer_size);
-    vkUnmapMemory(mesh->swapchain->device->device, staging_buffer->memory);
+    vkUnmapMemory(mesh->swapchain->device->device, staging->memory);
 
     mesh->index_buffer = vk_buffer_create(
         mesh->swapchain->device,
@@ -78,12 +78,12 @@ static void create_index_buffer(
 
     vk_buffer_copy(
         mesh->swapchain->device,
-        staging_buffer->handle,
+        staging->handle,
         mesh->index_buffer->handle,
         buffer_size
     );
 
-    vk_buffer_destroy(mesh->swapchain->device, staging_buffer);
+    vk_buffer_destroy(staging);
 }
 
 mesh_t *mesh_create(
@@ -125,8 +125,8 @@ void mesh_destroy(mesh_t *mesh)
 
     vkDeviceWaitIdle(device->device);
 
-    vk_buffer_destroy(device, mesh->vertex_buffer);
-    vk_buffer_destroy(device, mesh->index_buffer);
+    vk_buffer_destroy(mesh->vertex_buffer);
+    vk_buffer_destroy(mesh->index_buffer);
     free(mesh);
 }
 

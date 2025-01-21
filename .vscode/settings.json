@@ -70,6 +70,8 @@
         "string_view": "c",
         "initializer_list": "c",
         "span": "c",
-        "string": "c"
+        "string": "c",
+        "vk_image.h": "c",
+        "texture.h": "c"
     }
 }

@@ -6,6 +6,8 @@
 #include "vk_device.h"
 
 typedef struct vk_buffer {
+    vk_device_t *device;
+
     VkBuffer handle;
     VkDeviceMemory memory;
     VkDeviceSize size;
@@ -20,7 +22,7 @@ vk_buffer_t *vk_buffer_create(
     VkMemoryPropertyFlags properties
 );
 
-void vk_buffer_destroy(vk_device_t *device, vk_buffer_t *buffer);
+void vk_buffer_destroy(vk_buffer_t *buffer);
 
 // copy data
 void vk_buffer_copy(

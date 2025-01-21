@@ -32,6 +32,8 @@ vk_buffer_t *vk_buffer_create(
         return NULL;
     }
 
+    buffer->device = device;
+
     buffer->size = size;
 
     VkBufferCreateInfo buffer_info = {0};
@@ -86,12 +88,14 @@ vk_buffer_t *vk_buffer_create(
     return buffer;
 }
 
-void vk_buffer_destroy(vk_device_t *device, vk_buffer_t *buffer)
+void vk_buffer_destroy(vk_buffer_t *buffer)
 {
-    if (!buffer || !device) { return; }
+    if (!buffer) { return; }
 
-    vkDestroyBuffer(device->device, buffer->handle, NULL);
-    vkFreeMemory(device->device, buffer->memory, NULL);
+    vk_device_t *device = buffer->device;
+
+    vkDestroyBuffer(device, buffer->handle, NULL);
+    vkFreeMemory(device, buffer->memory, NULL);
     free(buffer);
 }
 

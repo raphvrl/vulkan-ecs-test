@@ -59,11 +59,13 @@ static void create_sync_objects(vk_swapchain_t *swapchain)
 
 static void create_command_buffer(vk_swapchain_t *swapchain)
 {
+    vk_device_t *device = swapchain->device;
+
     swapchain->command_buffers = malloc(swapchain->image_count * sizeof(VkCommandBuffer));
 
     VkCommandBufferAllocateInfo alloc_info = {0};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    alloc_info.commandPool = swapchain->command_pool;
+    alloc_info.commandPool = device->command_pool;
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     alloc_info.commandBufferCount = swapchain->image_count;
 
@@ -75,29 +77,6 @@ static void create_command_buffer(vk_swapchain_t *swapchain)
 
     if (res != VK_SUCCESS) {
         LOG_ERROR("Failed to allocate command buffers!");
-    }
-}
-
-static void create_command_pool(vk_swapchain_t *swapchain)
-{
-    vk_device_t *device = swapchain->device;
-
-    queue_family_indices_t indices = device->indices;
-
-    VkCommandPoolCreateInfo pool_info = {0};
-    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    pool_info.queueFamilyIndex = indices.graphics_family;
-    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-    VkResult res = vkCreateCommandPool(
-        device->device,
-        &pool_info,
-        NULL,
-        &swapchain->command_pool
-    );
-
-    if (res != VK_SUCCESS) {
-        LOG_ERROR("Failed to create command pool!");
     }
 }
 
@@ -348,7 +327,6 @@ vk_swapchain_t *vk_swapchain_create(vk_device_t *device)
     create_image_views(swapchain);
     create_renderpass(swapchain);
     create_framebuffers(swapchain);
-    create_command_pool(swapchain);
     create_command_buffer(swapchain);
     create_sync_objects(swapchain);
 
@@ -362,43 +340,14 @@ static void cleanup_swapchain(vk_swapchain_t *swapchain)
     vkDeviceWaitIdle(device->device);
 
     for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(
-            device->device,
-            swapchain->image_available[i],
-            NULL
-        );
-
-        vkDestroySemaphore(
-            device->device,
-            swapchain->render_finished[i],
-            NULL
-        );
-
-        vkDestroyFence(
-            device->device,
-            swapchain->in_flight_fences[i],
-            NULL
-        );
+        vkDestroySemaphore(device->device, swapchain->render_finished[i], NULL);
+        vkDestroySemaphore(device->device, swapchain->image_available[i], NULL);
+        vkDestroyFence(device->device, swapchain->in_flight_fences[i], NULL);
     }
 
-    free(swapchain->image_available);
     free(swapchain->render_finished);
+    free(swapchain->image_available);
     free(swapchain->in_flight_fences);
-
-    vkFreeCommandBuffers(
-        device->device,
-        swapchain->command_pool,
-        swapchain->image_count,
-        swapchain->command_buffers
-    );
-
-    free(swapchain->command_buffers);
-
-    vkDestroyCommandPool(
-        device->device,
-        swapchain->command_pool,
-        NULL
-    );
 
     for (u32 i = 0; i < swapchain->image_count; i++) {
         vkDestroyFramebuffer(
@@ -409,6 +358,15 @@ static void cleanup_swapchain(vk_swapchain_t *swapchain)
     }
 
     free(swapchain->framebuffers);
+
+    vkFreeCommandBuffers(
+        device->device,
+        device->command_pool,
+        swapchain->image_count,
+        swapchain->command_buffers
+    );
+
+    free(swapchain->command_buffers);
 
     vkDestroyRenderPass(
         device->device,
@@ -438,8 +396,6 @@ void vk_swapchain_destroy(vk_swapchain_t *swapchain)
 
     vk_device_t *device = swapchain->device;
 
-    vkDeviceWaitIdle(device->device);
-
     cleanup_swapchain(swapchain);
     
     free(swapchain);
@@ -464,12 +420,13 @@ static void recreate_swapchain(vk_swapchain_t *swapchain)
     create_image_views(swapchain);
     create_renderpass(swapchain);
     create_framebuffers(swapchain);
-    create_command_pool(swapchain);
     create_command_buffer(swapchain);
     create_sync_objects(swapchain);
+
+    swapchain->current_frame = 0;
 }
 
-void begin_frame(vk_swapchain_t *swapchain)
+bool begin_frame(vk_swapchain_t *swapchain)
 {
     vk_device_t *device = swapchain->device;
 
@@ -491,20 +448,29 @@ void begin_frame(vk_swapchain_t *swapchain)
         VK_NULL_HANDLE,
         &swapchain->image_index
     );
+
     u32 image_index = swapchain->image_index;
 
     if (
         res == VK_ERROR_OUT_OF_DATE_KHR ||
-        res == VK_SUBOPTIMAL_KHR
+        device->window->resized
     ) {
         device->window->resized = false;
         recreate_swapchain(swapchain);
-        return;
+        return false;
     } else if (res != VK_SUCCESS && res != VK_SUBOPTIMAL_KHR) {
         LOG_ERROR("Failed to acquire swapchain image!");
     }
 
+    vkResetFences(
+        device->device,
+        1,
+        &swapchain->in_flight_fences[swapchain->current_frame]
+    );
+
     VkCommandBuffer command_buffer = swapchain->command_buffers[image_index];
+
+    vkResetCommandBuffer(command_buffer, 0);
 
     VkCommandBufferBeginInfo begin_info = {0};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -551,6 +517,8 @@ void begin_frame(vk_swapchain_t *swapchain)
 
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+
+    return true;
 }
 
 void end_frame(vk_swapchain_t *swapchain)
@@ -588,12 +556,6 @@ void end_frame(vk_swapchain_t *swapchain)
     submit_info.pCommandBuffers = &swapchain->command_buffers[swapchain->image_index];
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = signal_semaphores;
-
-    vkResetFences(
-        device->device,
-        1,
-        &swapchain->in_flight_fences[swapchain->current_frame]
-    );
 
     if (vkQueueSubmit(
         device->graphics_queue,

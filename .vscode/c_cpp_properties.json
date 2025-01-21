@@ -7,7 +7,7 @@
                 "src",
                 "lib/glfw/include",
                 "lib/cglm/include",
-                "lib/vma/include",
+                "lib/stb",
                 "${VULKAN_SDK}/Include"
             ],
             "defines": [

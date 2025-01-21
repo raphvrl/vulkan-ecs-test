@@ -14,6 +14,27 @@ const char *device_extensions[] = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
+static void create_command_pool(vk_device_t *device)
+{
+    queue_family_indices_t indices = device->indices;
+
+    VkCommandPoolCreateInfo pool_info = {0};
+    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_info.queueFamilyIndex = indices.graphics_family;
+    pool_info.flags = 0;
+
+    VkResult res = vkCreateCommandPool(
+        device->device,
+        &pool_info,
+        NULL,
+        &device->command_pool
+    );
+
+    if (res != VK_SUCCESS) {
+        LOG_ERROR("Failed to create command pool!");
+    }
+}
+
 static queue_family_indices_t find_queue_families(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
     queue_family_indices_t indices = {0};
@@ -359,6 +380,7 @@ vk_device_t *vk_device_create(window_t *window)
     create_surface(device);
     pick_physical_device(device);
     create_logical_device(device);
+    create_command_pool(device);
 
     return device;
 }
@@ -369,6 +391,7 @@ void vk_device_destroy(vk_device_t *device)
         return;
     }
 
+    vkDestroyCommandPool(device->device, device->command_pool, NULL);
     vkDestroyDevice(device->device, NULL);
     vkDestroySurfaceKHR(device->instance, device->surface, NULL);
 

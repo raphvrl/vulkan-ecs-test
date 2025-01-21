@@ -137,7 +137,7 @@ void app_destroy(app_t *app)
 void app_run(app_t *app)
 {
     u32 id = ecs_new(app->registry);
-    ecs_add(app->ecs, id, C_TRANSFORM, &(c_transform_t){0});
+    ecs_add(app->ecs, id, C_TRANSFORM, &DEFAULT_TRANSFORM);
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
         .mesh = app->mesh
     });
@@ -148,8 +148,7 @@ void app_run(app_t *app)
         .pos = {0.0f, 0.0f, 3.0f}
     });
 
-    ecs_add(app->ecs, id, C_VELOCITY, &(c_velocity_t){0});
-
+    ecs_add(app->ecs, id, C_VELOCITY, &DEFAULT_TRANSFORM);
     ecs_add(app->ecs, id, C_CAMERA, &(c_camera_t){
         .pos = {0.0f, 0.0f, 2.0f},
         .front = {0.0f, 0.0f, -1.0f},
@@ -177,7 +176,7 @@ int main()
 {
     setup_utf8();
 
-    app_t *app = app_create(800, 600, "Hello Vulkan!");
+    app_t *app = app_create(1280, 720, "Hello Vulkan!");
     if (!app) {
         return 1;
     }

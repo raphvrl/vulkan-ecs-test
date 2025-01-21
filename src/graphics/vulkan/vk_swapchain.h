@@ -29,7 +29,6 @@ typedef struct vk_swapchain {
     VkRenderPass render_pass;
     VkFramebuffer *framebuffers;
 
-    VkCommandPool command_pool;
     VkCommandBuffer *command_buffers;
 
     VkSemaphore *image_available;
@@ -45,5 +44,5 @@ vk_swapchain_t *vk_swapchain_create(vk_device_t *device);
 void vk_swapchain_destroy(vk_swapchain_t *swapchain);
 
 // actions
-void begin_frame(vk_swapchain_t *swapchain);
+bool begin_frame(vk_swapchain_t *swapchain);
 void end_frame(vk_swapchain_t *swapchain);
