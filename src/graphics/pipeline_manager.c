@@ -38,6 +38,14 @@ static void create_main_pipeline(pipeline_manager_t *manager)
                     }
                 },
                 .attribute_count = 3
+            },
+            .push_constant_count = 1,
+            .push_constants = {
+                {
+                    .stage = VK_SHADER_STAGE_VERTEX_BIT,
+                    .offset = 0,
+                    .size = sizeof(mvp_pc_t)
+                }
             }
         }
     );
@@ -75,4 +83,22 @@ void pipeline_manager_destroy(pipeline_manager_t *manager)
 void pipeline_manager_bind(pipeline_manager_t *manager, pipeline_type_e type)
 {
     vk_pipeline_bind(manager->pipelines[type]);
+}
+
+void pipeline_manager_push_constant(
+    pipeline_manager_t *manager,
+    pipeline_type_e type,
+    VkShaderStageFlags stage,
+    u32 offset,
+    u32 size,
+    void *data
+)
+{
+    vk_pipeline_push_constant(
+        manager->pipelines[type],
+        stage,
+        offset,
+        size,
+        data
+    );
 }

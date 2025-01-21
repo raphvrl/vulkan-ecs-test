@@ -50,6 +50,26 @@
         "logger.h": "c",
         "text_encoding": "c",
         "thread": "c",
-        "ecs.h": "c"
+        "ecs.h": "c",
+        "c_model.h": "c",
+        "array": "c",
+        "charconv": "c",
+        "compare": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "variant": "c",
+        "c_velocity.h": "c",
+        "expected": "c",
+        "optional": "c",
+        "mesh.h": "c",
+        "typeinfo": "c",
+        "c_camera.h": "c",
+        "bitset": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "span": "c",
+        "string": "c"
     }
 }

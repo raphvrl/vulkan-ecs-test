@@ -158,8 +158,17 @@ vk_pipeline_t *vk_pipeline_create(
     color_blending.attachmentCount = 1;
     color_blending.pAttachments = &color_blend_attachment;
 
+    VkPushConstantRange push_constants[8] = {0};
+    for (u32 i = 0; i < info.push_constant_count; i++) {
+        push_constants[i].stageFlags = info.push_constants[i].stage;
+        push_constants[i].offset = info.push_constants[i].offset;
+        push_constants[i].size = info.push_constants[i].size;
+    }
+
     VkPipelineLayoutCreateInfo pipeline_layout_info = {0};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipeline_layout_info.pushConstantRangeCount = info.push_constant_count;
+    pipeline_layout_info.pPushConstantRanges = push_constants;
 
     VkResult res = vkCreatePipelineLayout(
         swapchain->device->device,
@@ -228,5 +237,27 @@ void vk_pipeline_bind(vk_pipeline_t *pipeline)
         swapchain->command_buffers[swapchain->image_index],
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         pipeline->handle
+    );
+}
+
+void vk_pipeline_push_constant(
+    vk_pipeline_t *pipeline,
+    VkShaderStageFlags stage,
+    u32 offset,
+    u32 size,
+    const void *data
+)
+{
+    VkCommandBuffer cmd = pipeline->swapchain->command_buffers[
+        pipeline->swapchain->image_index
+    ];
+
+    vkCmdPushConstants(
+        cmd,
+        pipeline->layout,
+        stage,
+        offset,
+        size,
+        data
     );
 }

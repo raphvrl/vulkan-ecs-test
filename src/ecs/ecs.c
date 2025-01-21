@@ -24,6 +24,14 @@ void ecs_destroy(ecs_t *ecs)
 
 void ecs_update(ecs_t *ecs, f32 dt)
 {
-    sys_physics_update(ecs, dt);
-    sys_render_update(ecs, dt);
+    s_control_tick(ecs, dt);
+    s_physics_tick(ecs, dt);
+    s_render_tick(ecs, dt);
+    s_camera_tick(ecs, dt);
+}
+
+void ecs_add(ecs_t *ecs, u32 id, component_type_e component, void *data)
+{
+    registry_add_component(ecs->registry, id, component);
+    component_manager_add(ecs->component_manager, id, component, data);
 }

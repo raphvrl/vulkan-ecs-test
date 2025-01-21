@@ -1,5 +1,57 @@
 #include "window.h"
 
+static void resize_callback(GLFWwindow *window, int width, int height)
+{
+    UNUSED(window);
+
+    window_t *win = glfwGetWindowUserPointer(window);
+    if (!win) { return; }
+
+    win->width = width;
+    win->height = height;
+}
+
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    UNUSED(scancode);
+    UNUSED(mods);
+
+    window_t *win = glfwGetWindowUserPointer(window);
+    if (!win) { return; }
+
+    if (action == GLFW_PRESS) {
+        win->keys[key] = true;
+    } else if (action == GLFW_RELEASE) {
+        win->keys[key] = false;
+    }
+}
+
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+    UNUSED(mods);
+
+    window_t *win = glfwGetWindowUserPointer(window);
+    if (!win) { return; }
+
+    if (action == GLFW_PRESS) {
+        win->mouses[button] = true;
+    } else if (action == GLFW_RELEASE) {
+        win->mouses[button] = false;
+    }
+}
+
+static void mouse_pos_callback(GLFWwindow *window, f64 x, f64 y)
+{
+    window_t *win = glfwGetWindowUserPointer(window);
+    if (!win) { return; }
+
+    win->rx = x - win->x;
+    win->ry = y - win->y;
+
+    win->x = x;
+    win->y = y;
+}
+
 window_t *window_create(u32 w, u32 h, const char *title)
 {
     window_t *win = malloc(sizeof(window_t));
@@ -12,6 +64,15 @@ window_t *window_create(u32 w, u32 h, const char *title)
     win->open = true;
     win->last_time = glfwGetTime();
     win->dt = 0.0f;
+
+    memset(win->keys, 0, sizeof(win->keys));
+    memset(win->mouses, 0, sizeof(win->mouses));
+
+    win->x = 0.0f;
+    win->y = 0.0f;
+
+    win->rx = 0.0f;
+    win->ry = 0.0f;
 
     if (glfwInit() != GLFW_TRUE) {
         window_destroy(win);
@@ -26,6 +87,13 @@ window_t *window_create(u32 w, u32 h, const char *title)
         window_destroy(win);
         return NULL;
     }
+
+    glfwSetWindowUserPointer(win->handle, win);
+
+    glfwSetWindowSizeCallback(win->handle, resize_callback);
+    glfwSetKeyCallback(win->handle, key_callback);
+    glfwSetMouseButtonCallback(win->handle, mouse_button_callback);
+    glfwSetCursorPosCallback(win->handle, mouse_pos_callback);
 
     return win;
 }
@@ -45,6 +113,9 @@ void window_destroy(window_t *win)
 void window_update(window_t *win)
 {
     if (!win) { return; }
+
+    win->rx = 0.0f;
+    win->ry = 0.0f;
 
     glfwPollEvents();
 

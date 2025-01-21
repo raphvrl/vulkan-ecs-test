@@ -1,5 +1,91 @@
 #include "mesh.h"
 
+static void create_vertex_buffer(
+    mesh_t *mesh,
+    vertex_t *vertices,
+    u32 vertex_count
+) {
+    VkDeviceSize buffer_size = sizeof(vertex_t) * vertex_count;
+
+    vk_buffer_t *staging_buffer = vk_buffer_create(
+        mesh->swapchain->device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    void *data;
+    vkMapMemory(
+        mesh->swapchain->device->device,
+        staging_buffer->memory,
+        0,
+        buffer_size,
+        0,
+        &data
+    );
+    memcpy(data, vertices, buffer_size);
+    vkUnmapMemory(mesh->swapchain->device->device, staging_buffer->memory);
+
+    mesh->vertex_buffer = vk_buffer_create(
+        mesh->swapchain->device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
+
+    vk_buffer_copy(
+        mesh->swapchain->device,
+        staging_buffer->handle,
+        mesh->vertex_buffer->handle,
+        buffer_size
+    );
+
+    vk_buffer_destroy(mesh->swapchain->device, staging_buffer);
+}
+
+static void create_index_buffer(
+    mesh_t *mesh,
+    u32 *indices,
+    u32 index_count
+) {
+    VkDeviceSize buffer_size = sizeof(u32) * index_count;
+
+    vk_buffer_t *staging_buffer = vk_buffer_create(
+        mesh->swapchain->device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    void *data;
+    vkMapMemory(
+        mesh->swapchain->device->device,
+        staging_buffer->memory,
+        0,
+        buffer_size,
+        0,
+        &data
+    );
+    memcpy(data, indices, buffer_size);
+    vkUnmapMemory(mesh->swapchain->device->device, staging_buffer->memory);
+
+    mesh->index_buffer = vk_buffer_create(
+        mesh->swapchain->device,
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
+
+    vk_buffer_copy(
+        mesh->swapchain->device,
+        staging_buffer->handle,
+        mesh->index_buffer->handle,
+        buffer_size
+    );
+
+    vk_buffer_destroy(mesh->swapchain->device, staging_buffer);
+}
+
 mesh_t *mesh_create(
     vk_swapchain_t *swapchain,
     vertex_t *vertices,
@@ -13,80 +99,8 @@ mesh_t *mesh_create(
     }
 
     mesh->swapchain = swapchain;
-
     mesh->vertex_count = vertex_count;
     mesh->index_count = index_count;
-
-    VkDeviceSize vertex_buffer_size = sizeof(vertex_t) * vertex_count;
-    VkDeviceSize index_buffer_size = sizeof(u32) * index_count;
-
-    vk_buffer_t *staging_vertex_buffer = vk_buffer_create(
-        swapchain->device,
-        vertex_buffer_size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-    );
-
-    vk_buffer_t *staging_index_buffer = vk_buffer_create(
-        swapchain->device,
-        index_buffer_size,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-    );
-
-    void *data;
-    vkMapMemory(
-        swapchain->device->device,
-        staging_vertex_buffer->memory,
-        0,
-        vertex_buffer_size,
-        0,
-        &data
-    );
-    memcpy(data, vertices, vertex_buffer_size);
-    vkUnmapMemory(swapchain->device->device, staging_vertex_buffer->memory);
-
-    vkMapMemory(
-        swapchain->device->device,
-        staging_index_buffer->memory,
-        0,
-        index_buffer_size,
-        0,
-        &data
-    );
-    memcpy(data, indices, index_buffer_size);
-    vkUnmapMemory(swapchain->device->device, staging_index_buffer->memory);
-
-    mesh->vertex_buffer = vk_buffer_create(
-        swapchain->device,
-        vertex_buffer_size,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-    );
-
-    mesh->index_buffer = vk_buffer_create(
-        swapchain->device,
-        index_buffer_size,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-    );
-
-    vk_buffer_copy(
-        swapchain->device,
-        staging_vertex_buffer->handle,
-        mesh->vertex_buffer->handle,
-        vertex_buffer_size
-    );
-
-    vk_buffer_copy(
-        swapchain->device,
-        staging_index_buffer->handle,
-        mesh->index_buffer->handle,
-        index_buffer_size
-    );
-
-    vk_buffer_destroy(swapchain->device, staging_vertex_buffer);
-    vk_buffer_destroy(swapchain->device, staging_index_buffer);
 
     mesh->binding_description = mesh_get_binding_description();
     memcpy(
@@ -94,6 +108,9 @@ mesh_t *mesh_create(
         mesh_get_attribute_descriptions(),
         sizeof(mesh->attribute_descriptions)
     );
+
+    create_vertex_buffer(mesh, vertices, vertex_count);
+    create_index_buffer(mesh, indices, index_count);
 
     return mesh;
 }

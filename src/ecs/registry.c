@@ -51,12 +51,5 @@ void registry_add_component(registry_t *registry, u32 id, u32 component)
 {
     if (id >= MAX_ENTITIES) { return; }
 
-    registry->entities[id].mask |= component;
-}
-
-void registry_remove_component(registry_t *registry, u32 id, u32 component)
-{
-    if (id >= MAX_ENTITIES) { return; }
-
-    registry->entities[id].mask &= ~(1 << component);
+    registry->entities[id].mask |= (1 << component);
 }

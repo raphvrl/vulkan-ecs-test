@@ -136,25 +136,32 @@ void app_destroy(app_t *app)
 
 void app_run(app_t *app)
 {
-    u32 id = registry_create_entity(app->registry);
-    registry_add_component(app->registry, id, COMPONENT_TRANSFORM);
-    registry_add_component(app->registry, id, COMPONENT_MODEL);
+    u32 id = ecs_new(app->registry);
+    ecs_add(app->ecs, id, C_TRANSFORM, &(c_transform_t){0});
+    ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
+        .mesh = app->mesh
+    });
 
-    cmp_transform_t *transform = &app->component_manager->transforms[id];
-    transform->position[0] = 0.0f;
-    transform->position[1] = 0.0f;
-    transform->position[2] = 0.0f;
+    id = ecs_new(app->registry);
 
-    transform->rotation[0] = 0.0f;
-    transform->rotation[1] = 0.0f;
-    transform->rotation[2] = 0.0f;
+    ecs_add(app->ecs, id, C_TRANSFORM, &(c_transform_t){
+        .pos = {0.0f, 0.0f, 3.0f}
+    });
 
-    transform->scale[0] = 1.0f;
-    transform->scale[1] = 1.0f;
-    transform->scale[2] = 1.0f;
+    ecs_add(app->ecs, id, C_VELOCITY, &(c_velocity_t){0});
 
-    cmp_model_t *model = &app->component_manager->models[id];
-    model->mesh = app->mesh;
+    ecs_add(app->ecs, id, C_CAMERA, &(c_camera_t){
+        .pos = {0.0f, 0.0f, 2.0f},
+        .front = {0.0f, 0.0f, -1.0f},
+        .up = {0.0f, 1.0f, 0.0f},
+        .right = {1.0f, 0.0f, 0.0f},
+        .yaw = -90.0f,
+        .pitch = 0.0f,
+        .fov = 45.0f,
+        .aspect = (f32)app->window->width / (f32)app->window->height,
+        .near_plane = 0.1f,
+        .far_plane = 100.0f
+    });
 
     while (app->window->open) {
         window_update(app->window);

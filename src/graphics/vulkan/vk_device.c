@@ -358,6 +358,8 @@ vk_device_t *vk_device_create(GLFWwindow *window)
     pick_physical_device(device);
     create_logical_device(device);
 
+    device->window = window;
+
     return device;
 }
 

@@ -32,4 +32,3 @@ u32 registry_create_entity(registry_t *registry);
 void registry_destroy_entity(registry_t *registry, u32 id);
 
 void registry_add_component(registry_t *registry, u32 id, u32 component);
-void registry_remove_component(registry_t *registry, u32 id, u32 component);

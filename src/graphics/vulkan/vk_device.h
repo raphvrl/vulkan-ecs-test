@@ -27,6 +27,8 @@ typedef struct vk_device {
     VkQueue graphics_queue;
     VkQueue present_queue;
     queue_family_indices_t indices;
+
+    GLFWwindow *window;
 } vk_device_t;
 
 // constructor and destructor

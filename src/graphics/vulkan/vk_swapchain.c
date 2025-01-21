@@ -271,12 +271,17 @@ static void create_swapchain(vk_swapchain_t *swapchain)
         }
     }
 
+    int width, height;
+    glfwGetFramebufferSize(device->window, &width, &height);
+
+    printf("Width: %d, Height: %d\n", width, height);
+
     VkExtent2D extent = {0};
     if (details.capabilities.currentExtent.width != UINT32_MAX) {
         extent = details.capabilities.currentExtent;
     } else {
-        extent.width = 800;
-        extent.height = 600;
+        extent.width = width;
+        extent.height = height;
     }
 
     u32 image_count = details.capabilities.minImageCount + 1;
@@ -350,89 +355,6 @@ vk_swapchain_t *vk_swapchain_create(vk_device_t *device)
     create_sync_objects(swapchain);
 
     return swapchain;
-}
-
-void vk_swapchain_destroy(vk_swapchain_t *swapchain)
-{
-    if (!swapchain) {
-        return;
-    }
-
-    vk_device_t *device = swapchain->device;
-
-    vkDeviceWaitIdle(device->device);
-
-    for (u32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(
-            device->device,
-            swapchain->image_available[i],
-            NULL
-        );
-
-        vkDestroySemaphore(
-            device->device,
-            swapchain->render_finished[i],
-            NULL
-        );
-
-        vkDestroyFence(
-            device->device,
-            swapchain->in_flight_fences[i],
-            NULL
-        );
-    }
-
-    free(swapchain->image_available);
-    free(swapchain->render_finished);
-    free(swapchain->in_flight_fences);
-
-    for (u32 i = 0; i < swapchain->image_count; i++) {
-        vkFreeCommandBuffers(
-            device->device,
-            swapchain->command_pool,
-            1,
-            &swapchain->command_buffers[i]
-        );
-    }
-
-    free(swapchain->command_buffers);
-
-    vkDestroyCommandPool(
-        device->device,
-        swapchain->command_pool,
-        NULL
-    );
-
-    for (u32 i = 0; i < swapchain->image_count; i++) {
-        vkDestroyFramebuffer(
-            device->device,
-            swapchain->framebuffers[i],
-            NULL
-        );
-    }
-
-    free(swapchain->framebuffers);
-
-    vkDestroyRenderPass(
-        swapchain->device->device,
-        swapchain->render_pass,
-        NULL
-    );
-
-    for (u32 i = 0; i < swapchain->image_count; i++) {
-        vkDestroyImageView(
-            device->device,
-            swapchain->image_views[i],
-            NULL
-        );
-    }
-
-    free(swapchain->image_views);
-    free(swapchain->images);
-
-    vkDestroySwapchainKHR(device->device, swapchain->handle, NULL);
-    
-    free(swapchain);
 }
 
 static void cleanup_swapchain(vk_swapchain_t *swapchain)
@@ -510,8 +432,34 @@ static void cleanup_swapchain(vk_swapchain_t *swapchain)
     vkDestroySwapchainKHR(device->device, swapchain->handle, NULL);
 }
 
+void vk_swapchain_destroy(vk_swapchain_t *swapchain)
+{
+    if (!swapchain) {
+        return;
+    }
+
+    vk_device_t *device = swapchain->device;
+
+    vkDeviceWaitIdle(device->device);
+
+    cleanup_swapchain(swapchain);
+    
+    free(swapchain);
+}
+
 static void recreate_swapchain(vk_swapchain_t *swapchain)
 {
+    vk_device_t *device = swapchain->device;
+
+    vkDeviceWaitIdle(device->device);
+
+    int width, height;
+    glfwGetFramebufferSize(device->window, &width, &height);
+    while (width == 0 || height == 0) {
+        glfwGetFramebufferSize(device->window, &width, &height);
+        glfwWaitEvents();
+    }
+
     cleanup_swapchain(swapchain);
 
     create_swapchain(swapchain);
