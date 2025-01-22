@@ -34,9 +34,8 @@ static void create_vertex_buffer(
     );
 
     vk_buffer_copy(
-        mesh->swapchain->device,
-        staging->handle,
-        mesh->vertex_buffer->handle,
+        staging,
+        mesh->vertex_buffer,
         buffer_size
     );
 
@@ -77,9 +76,8 @@ static void create_index_buffer(
     );
 
     vk_buffer_copy(
-        mesh->swapchain->device,
-        staging->handle,
-        mesh->index_buffer->handle,
+        staging,
+        mesh->index_buffer,
         buffer_size
     );
 

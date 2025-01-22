@@ -94,52 +94,26 @@ void vk_buffer_destroy(vk_buffer_t *buffer)
 
     vk_device_t *device = buffer->device;
 
-    vkDestroyBuffer(device, buffer->handle, NULL);
-    vkFreeMemory(device, buffer->memory, NULL);
+    vkDestroyBuffer(device->device, buffer->handle, NULL);
+    vkFreeMemory(device->device, buffer->memory, NULL);
     free(buffer);
 }
 
 void vk_buffer_copy(
-    vk_device_t *device,
-    VkBuffer src,
-    VkBuffer dst,
+    vk_buffer_t *src,
+    vk_buffer_t *dst,
     VkDeviceSize size
 ) {
-    VkCommandPoolCreateInfo pool_info = {0};
-    pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    pool_info.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-    pool_info.queueFamilyIndex = device->indices.graphics_family;
-
-    VkCommandPool command_pool;
-    VkResult res = vkCreateCommandPool(
-        device->device,
-        &pool_info,
-        NULL,
-        &command_pool
-    );
-
-    if (res != VK_SUCCESS) {
-        LOG_ERROR("Failed to create command pool!");
-        return;
-    }
+    vk_device_t *device = src->device;
 
     VkCommandBufferAllocateInfo alloc_info = {0};
     alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info.commandPool = command_pool;
+    alloc_info.commandPool = device->command_pool;
     alloc_info.commandBufferCount = 1;
 
     VkCommandBuffer command_buffer;
-    res = vkAllocateCommandBuffers(
-        device->device,
-        &alloc_info,
-        &command_buffer
-    );
-
-    if (res != VK_SUCCESS) {
-        LOG_ERROR("Failed to allocate command buffer!");
-        return;
-    }
+    vkAllocateCommandBuffers(device->device, &alloc_info, &command_buffer);
 
     VkCommandBufferBeginInfo begin_info = {0};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -149,7 +123,7 @@ void vk_buffer_copy(
 
     VkBufferCopy copy_region = {0};
     copy_region.size = size;
-    vkCmdCopyBuffer(command_buffer, src, dst, 1, &copy_region);
+    vkCmdCopyBuffer(command_buffer, src->handle, dst->handle, 1, &copy_region);
 
     vkEndCommandBuffer(command_buffer);
 
@@ -161,6 +135,5 @@ void vk_buffer_copy(
     vkQueueSubmit(device->graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
     vkQueueWaitIdle(device->graphics_queue);
 
-    vkFreeCommandBuffers(device->device, command_pool, 1, &command_buffer);
-    vkDestroyCommandPool(device->device, command_pool, NULL);
+    vkFreeCommandBuffers(device->device, device->command_pool, 1, &command_buffer);
 }

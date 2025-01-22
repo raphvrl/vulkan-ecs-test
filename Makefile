@@ -90,9 +90,6 @@ SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(BIN_DIR)/%.vert.spv, $(SHADER_SRC))
 SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(BIN_DIR)/%.frag.spv, $(SHADER_SRC))
 
-# submodule
-SUBMODULES = $(LIB_DIR)/.submodules
-
 all: $(GLFW_BIN) $(TARGET) $(SHADER_SPV)
 
 $(TARGET): $(OBJ)

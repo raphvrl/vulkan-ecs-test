@@ -79,12 +79,17 @@ texture_t *texture_create(vk_swapchain_t *swapchain, const char *path)
     sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
-    VkCreateSampler(
+    vkCreateSampler(
         device->device,
         &sampler_info,
         NULL,
         &texture->sampler
     );
+
+    VkDescriptorSetAllocateInfo alloc_info = {0};
+    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    alloc_info.descriptorPool = device->descriptor_pool;
+    alloc_info.descriptorSetCount = 1;
 
     vk_buffer_destroy(staging);
     stbi_image_free(pixel);

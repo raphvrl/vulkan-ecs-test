@@ -14,14 +14,40 @@ const char *device_extensions[] = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
+static void create_descriptor_pool(vk_device_t *device)
+{
+    VkDescriptorPoolSize pool_sizes[2] = {0};
+    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    pool_sizes[0].descriptorCount = 1000;
+    pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    pool_sizes[1].descriptorCount = 1000;
+
+    VkDescriptorPoolCreateInfo pool_info = {0};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.poolSizeCount = ARR_LEN(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+    pool_info.maxSets = 1000;
+
+    VkResult res = vkCreateDescriptorPool(
+        device->device,
+        &pool_info,
+        NULL,
+        &device->descriptor_pool
+    );
+
+    if (res != VK_SUCCESS) {
+        LOG_ERROR("Failed to create descriptor pool!");
+    }
+}
+
 static void create_command_pool(vk_device_t *device)
 {
     queue_family_indices_t indices = device->indices;
 
     VkCommandPoolCreateInfo pool_info = {0};
     pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     pool_info.queueFamilyIndex = indices.graphics_family;
-    pool_info.flags = 0;
 
     VkResult res = vkCreateCommandPool(
         device->device,
@@ -381,6 +407,7 @@ vk_device_t *vk_device_create(window_t *window)
     pick_physical_device(device);
     create_logical_device(device);
     create_command_pool(device);
+    create_descriptor_pool(device);
 
     return device;
 }
@@ -391,6 +418,7 @@ void vk_device_destroy(vk_device_t *device)
         return;
     }
 
+    vkDestroyDescriptorPool(device->device, device->descriptor_pool, NULL);
     vkDestroyCommandPool(device->device, device->command_pool, NULL);
     vkDestroyDevice(device->device, NULL);
     vkDestroySurfaceKHR(device->instance, device->surface, NULL);

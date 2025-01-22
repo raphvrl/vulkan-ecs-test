@@ -13,6 +13,7 @@ typedef struct texture {
 
     vk_image_t *image;
     VkSampler sampler;
+    VkDescriptorSet descriptor;
 } texture_t;
 
 // constructor

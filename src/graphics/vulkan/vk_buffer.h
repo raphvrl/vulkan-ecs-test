@@ -26,8 +26,7 @@ void vk_buffer_destroy(vk_buffer_t *buffer);
 
 // copy data
 void vk_buffer_copy(
-    vk_device_t *device,
-    VkBuffer src,
-    VkBuffer dst,
+    vk_buffer_t *src,
+    vk_buffer_t *dst,
     VkDeviceSize size
 );

@@ -36,6 +36,7 @@ typedef struct vk_pipeline_info {
     vk_pipeline_vertex_input_t input;
     u32 push_constant_count;
     vk_pipeline_push_constant_t push_constants[8];
+    VkDescriptorSetLayout descriptor_layouts;
 } vk_pipeline_info_t;
 
 // constructor and destructor

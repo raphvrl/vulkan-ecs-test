@@ -72,6 +72,8 @@
         "span": "c",
         "string": "c",
         "vk_image.h": "c",
-        "texture.h": "c"
+        "texture.h": "c",
+        "vk_buffer.h": "c",
+        "stb_image.h": "c"
     }
 }

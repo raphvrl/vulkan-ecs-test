@@ -394,8 +394,6 @@ void vk_swapchain_destroy(vk_swapchain_t *swapchain)
         return;
     }
 
-    vk_device_t *device = swapchain->device;
-
     cleanup_swapchain(swapchain);
     
     free(swapchain);

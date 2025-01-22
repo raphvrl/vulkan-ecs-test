@@ -29,6 +29,7 @@ typedef struct vk_device {
     VkQueue present_queue;
     queue_family_indices_t indices;
     VkCommandPool command_pool;
+    VkDescriptorPool descriptor_pool;
 
     window_t *window;
 } vk_device_t;
