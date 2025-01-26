@@ -27,6 +27,7 @@ void ecs_update(ecs_t *ecs, f32 dt)
     s_control_tick(ecs, dt);
     s_physics_tick(ecs, dt);
     s_render_tick(ecs, dt);
+    s_gui_tick(ecs, dt);
     s_camera_tick(ecs, dt);
 }
 

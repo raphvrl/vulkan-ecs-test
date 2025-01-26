@@ -40,7 +40,7 @@ CFLAGS += -I$(SRC_DIR)
 
 LDFLAGS = -L$(LIB_DIR)
 
-SUBMODULES = $(LIB_DIR)/.submodules
+SUBMODULES = $(BIN_DIR)/.submodules
 
 # vulkan
 ifndef VULKAN_SDK
@@ -95,8 +95,10 @@ LDFLAGS += -I$(CGTLF_INC)
 # cimgui
 CIMGUI_DIR := $(LIB_DIR)/cimgui
 CIMGUI_INC := $(CIMGUI_DIR)
+CIMGUI_BIN = libcimgui.a
+CIMGUI_STAMP = $(BIN_DIR)/.cimgui_compiled
 
-LDFLAGS += -I$(CIMGUI_INC)
+LDFLAGS += -I$(CIMGUI_INC) -L$(CIMGUI_DIR) -lcimgui -lstdc++ -static-libstdc++ -static-libgcc
 
 # shader
 SHADER_DIR := shaders
@@ -105,7 +107,7 @@ SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(SHADER_BIN)/%.vert.spv, $(SHADER_SRC))
 SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(SHADER_BIN)/%.frag.spv, $(SHADER_SRC))
 
-all: $(GLFW_BIN) $(TARGET) $(SHADER_SPV)
+all: $(GLFW_BIN) $(CIMGUI_BIN) $(TARGET) $(SHADER_SPV)
 
 $(TARGET): $(OBJ)
 	@$(PRINT) "Linking $@"
@@ -134,12 +136,21 @@ $(GLFW_BIN): $(SUBMODULES)
 	@$(CMAKE) -S $(GLFW_DIR) -B $(GLFW_BIN) $(GLFW_FLAGS)
 	@$(CMAKE_BUILD) $(GLFW_BIN)
 
+$(CIMGUI_BIN): $(CIMGUI_STAMP)
+
+$(CIMGUI_STAMP):
+	@$(PRINT) "Compiling cimgui"
+	@$(MKDIR) $(dir $@)
+	@$(MAKE) -C $(CIMGUI_DIR) static
+	@touch $@
+
 $(SUBMODULES):
 	@$(PRINT) "Initializing submodules"
 	@git submodule update --init --recursive
 	@touch $@
 
 clean-all:
+	@$(MAKE) -C $(CIMGUI_DIR) fclean
 	@$(PRINT) "Cleaning all"
 	@$(RM) $(BIN_DIR) $(TARGET)
 
