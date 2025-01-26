@@ -40,6 +40,8 @@ CFLAGS += -I$(SRC_DIR)
 
 LDFLAGS = -L$(LIB_DIR)
 
+SUBMODULES = $(LIB_DIR)/.submodules
+
 # vulkan
 ifndef VULKAN_SDK
 	$(error "vulkan sdk not found")
@@ -89,6 +91,12 @@ CGTLF_DIR := $(LIB_DIR)/cgltf
 CGTLF_INC := $(CGTLF_DIR)
 
 LDFLAGS += -I$(CGTLF_INC)
+
+# cimgui
+CIMGUI_DIR := $(LIB_DIR)/cimgui
+CIMGUI_INC := $(CIMGUI_DIR)
+
+LDFLAGS += -I$(CIMGUI_INC)
 
 # shader
 SHADER_DIR := shaders
