@@ -74,6 +74,10 @@
         "vk_image.h": "c",
         "texture.h": "c",
         "vk_buffer.h": "c",
-        "stb_image.h": "c"
+        "stb_image.h": "c",
+        "map.h": "c",
+        "asset_manager.h": "c",
+        "cgltf.h": "c",
+        "*.tcc": "c"
     }
 }

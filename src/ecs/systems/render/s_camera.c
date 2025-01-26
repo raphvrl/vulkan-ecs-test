@@ -46,6 +46,9 @@ void s_camera_tick(ecs_t *ecs, f32 dt)
                 camera->far_plane,
                 camera->proj
             );
+
+            // flip the y axis for vulkan
+            camera->proj[1][1] *= -1.0f;
         }
     }
 }

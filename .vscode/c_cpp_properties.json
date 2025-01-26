@@ -8,6 +8,7 @@
                 "lib/glfw/include",
                 "lib/cglm/include",
                 "lib/stb",
+                "lib/cgltf",
                 "${VULKAN_SDK}/Include"
             ],
             "defines": [

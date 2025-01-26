@@ -42,75 +42,34 @@ app_t *app_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
-    // cube vertices
-    vertex_t vertices[] = {
-        // Front face
-        {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-        // Back face
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
-        // Left face
-        {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-0.5f,  0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        // Right face
-        {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        // Top face
-        {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-        // Bottom face
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}}
-    };
+    app->pipeline_manager = pipeline_manager_create(app->swapchain);    
+    app->asset_manager = asset_manager_create(app->swapchain);
 
-    // cube indices
-    u32 indices[] = {
-        0, 1, 2, 2, 3, 0,
-        4, 5, 6, 6, 7, 4,
-        8, 9, 10, 10, 11, 8,
-        12, 13, 14, 14, 15, 12,
-        16, 17, 18, 18, 19, 16,
-        20, 21, 22, 22, 23, 20
-    };
-
-    app->mesh = mesh_create(
-        app->swapchain,
-        vertices,
-        ARR_LEN(vertices),
-        indices,
-        ARR_LEN(indices)
+    asset_manager_load_mesh(
+        app->asset_manager,
+        "assets/mesh/cube.glb",
+        "cube"
     );
 
-    if (!app->mesh) {
-        app_destroy(app);
-        return NULL;
-    }
-
-    app->texture = texture_create(
-        app->swapchain,
-        "assets/img/dog.jpg"
+    asset_manager_load_mesh(
+        app->asset_manager,
+        "assets/mesh/monkey.glb",
+        "monkey"
     );
 
-    if (!app->texture) {
-        app_destroy(app);
-        return NULL;
-    }
+    asset_manager_load_texture(
+        app->asset_manager,
+        "assets/texture/dog.jpg",
+        "dog"
+    );
 
-    app->pipeline_manager = pipeline_manager_create(app->swapchain);
+    asset_manager_load_texture(
+        app->asset_manager,
+        "assets/texture/gru.png",
+        "gru"
+    );
 
+    app->component_manager = component_manager_create();
     app->registry = registry_create();
     app->component_manager = component_manager_create();
     app->ecs = ecs_create(
@@ -131,10 +90,8 @@ void app_destroy(app_t *app)
         return;
     }
 
+    asset_manager_destroy(app->asset_manager);
     pipeline_manager_destroy(app->pipeline_manager);
-    
-    texture_destroy(app->texture);
-    mesh_destroy(app->mesh);
 
     ecs_destroy(app->ecs);
     component_manager_destroy(app->component_manager);
@@ -151,8 +108,8 @@ void app_run(app_t *app)
     u32 id = ecs_new(app->registry);
     ecs_add(app->ecs, id, C_TRANSFORM, &DEFAULT_TRANSFORM);
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
-        .mesh = app->mesh,
-        .texture = app->texture
+        .mesh = asset_manager_get_mesh(app->asset_manager, "cube"),
+        .texture = asset_manager_get_texture(app->asset_manager, "gru")
     });
 
     id = ecs_new(app->registry);
@@ -178,13 +135,13 @@ void app_run(app_t *app)
     id = ecs_new(app->registry);
 
     ecs_add(app->ecs, id, C_TRANSFORM, &(c_transform_t){
-        .pos = {0.0f, 10.0f, 0.0f},
+        .pos = {0.0f, -2.0f, 0.0f},
         .scale = {1.0f, 1.0f, 1.0f}
     });
 
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
-        .mesh = app->mesh,
-        .texture = app->texture
+        .mesh = asset_manager_get_mesh(app->asset_manager, "cube"),
+        .texture = asset_manager_get_texture(app->asset_manager, "dog")
     });
 
     while (app->window->open) {
@@ -201,13 +158,13 @@ int main()
 {
     setup_utf8();
 
-    app_t *app = app_create(1280, 720, "Hello Vulkan!");
+    app_t *app = app_create(1600, 900, "Hello Vulkan!");
     if (!app) {
-        return 1;
+        return EXIT_FAILURE;
     }
 
     app_run(app);
     app_destroy(app);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

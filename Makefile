@@ -84,6 +84,12 @@ STB_INC := $(STB_DIR)
 
 LDFLAGS += -I$(STB_INC)
 
+# cgltf
+CGTLF_DIR := $(LIB_DIR)/cgltf
+CGTLF_INC := $(CGTLF_DIR)
+
+LDFLAGS += -I$(CGTLF_INC)
+
 # shader
 SHADER_DIR := shaders
 SHADER_BIN := $(BIN_DIR)/shaders

@@ -3,10 +3,12 @@
 #define CAMERA_SPEED 5.0f
 #define SENSITIVITY 0.1f
 
+#define WORLD_UP (v3){0.0f, 1.0f, 0.0f}
+
 static void mouse_control(c_camera_t *camera, f32 x, f32 y)
 {
     camera->yaw += x * SENSITIVITY;
-    camera->pitch += y * SENSITIVITY;
+    camera->pitch -= y * SENSITIVITY;
 
     if (camera->pitch > 89.0f) {
         camera->pitch = 89.0f;
@@ -31,12 +33,17 @@ void s_control_tick(ecs_t *ecs, f32 dt)
 
             glm_vec3_zero(velocity->pos);
 
+            v3 front;
+            front[0] = camera->front[0];
+            front[1] = 0.0f;
+            front[2] = camera->front[2];
+
             if (ecs->window->keys[K_W]) {
-                glm_vec3_add(velocity->pos, camera->front, velocity->pos);
+                glm_vec3_add(velocity->pos, front, velocity->pos);
             }
 
             if (ecs->window->keys[K_S]) {
-                glm_vec3_sub(velocity->pos, camera->front, velocity->pos);
+                glm_vec3_sub(velocity->pos, front, velocity->pos);
             }
 
             if (ecs->window->keys[K_A]) {
@@ -48,11 +55,11 @@ void s_control_tick(ecs_t *ecs, f32 dt)
             }
 
             if (ecs->window->keys[K_SPACE]) {
-                glm_vec3_sub(velocity->pos, camera->up, velocity->pos);
+                glm_vec3_add(velocity->pos, WORLD_UP, velocity->pos);
             }
 
             if (ecs->window->keys[K_LEFT_SHIFT]) {
-                glm_vec3_add(velocity->pos, camera->up, velocity->pos);
+                glm_vec3_sub(velocity->pos, WORLD_UP, velocity->pos);
             }
 
             glm_vec3_normalize(velocity->pos);

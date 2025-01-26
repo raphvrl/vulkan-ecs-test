@@ -9,22 +9,19 @@
 #include "graphics/vulkan/vk_swapchain.h"
 #include "graphics/vulkan/vk_pipeline.h"
 #include "graphics/pipeline_manager.h"
-#include "graphics/mesh.h"
-#include "graphics/texture.h"
+#include "graphics/asset_manager.h"
 
 // main struct
 typedef struct app {
     window_t *window;
     vk_device_t *device;
     vk_swapchain_t *swapchain;
-    mesh_t *mesh;
-    texture_t *texture;
 
     pipeline_manager_t *pipeline_manager;
+    asset_manager_t *asset_manager;
 
-
-    registry_t *registry;
     component_manager_t *component_manager;
+    registry_t *registry;
     ecs_t *ecs;
 } app_t;
 

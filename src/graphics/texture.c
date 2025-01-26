@@ -127,6 +127,8 @@ void texture_destroy(texture_t *texture)
 
     vk_device_t *device = texture->swapchain->device;
 
+    vkDeviceWaitIdle(device->device);
+
     vkDestroySampler(device->device, texture->sampler, NULL);
     vk_image_destroy(texture->image);
 
@@ -135,6 +137,8 @@ void texture_destroy(texture_t *texture)
 
 void texture_bind(texture_t *texture, vk_pipeline_t *pipeline)
 {
+    if (!texture) { return; }
+
     VkCommandBuffer cmd = swapchain_get_buffer(texture->swapchain);
 
     vkCmdBindDescriptorSets(
