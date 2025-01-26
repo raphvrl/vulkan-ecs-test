@@ -86,9 +86,10 @@ LDFLAGS += -I$(STB_INC)
 
 # shader
 SHADER_DIR := shaders
+SHADER_BIN := $(BIN_DIR)/shaders
 SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
-SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(BIN_DIR)/%.vert.spv, $(SHADER_SRC))
-SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(BIN_DIR)/%.frag.spv, $(SHADER_SRC))
+SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(SHADER_BIN)/%.vert.spv, $(SHADER_SRC))
+SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(SHADER_BIN)/%.frag.spv, $(SHADER_SRC))
 
 all: $(GLFW_BIN) $(TARGET) $(SHADER_SPV)
 
@@ -103,12 +104,12 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 
 -include $(DEP)
 
-$(BIN_DIR)/%.vert.spv: $(SHADER_DIR)/%.vert
+$(SHADER_BIN)/%.vert.spv: $(SHADER_DIR)/%.vert
 	@$(PRINT) "Compiling $<"
 	@$(MKDIR) $(dir $@)
 	@$(GLSLC) $< -o $@
 
-$(BIN_DIR)/%.frag.spv: $(SHADER_DIR)/%.frag
+$(SHADER_BIN)/%.frag.spv: $(SHADER_DIR)/%.frag
 	@$(PRINT) "Compiling $<"
 	@$(MKDIR) $(dir $@)
 	@$(GLSLC) $< -o $@

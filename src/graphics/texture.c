@@ -54,7 +54,8 @@ texture_t *texture_create(vk_swapchain_t *swapchain, const char *path)
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT
     );
 
     vk_image_transition_layout(
@@ -90,6 +91,29 @@ texture_t *texture_create(vk_swapchain_t *swapchain, const char *path)
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = device->descriptor_pool;
     alloc_info.descriptorSetCount = 1;
+    alloc_info.pSetLayouts = &device->texture_layout;
+
+    vkAllocateDescriptorSets(
+        device->device,
+        &alloc_info,
+        &texture->descriptor
+    );
+
+    VkDescriptorImageInfo image_info = {0};
+    image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    image_info.imageView = texture->image->view;
+    image_info.sampler = texture->sampler;
+
+    VkWriteDescriptorSet write = {0};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = texture->descriptor;
+    write.dstBinding = 0;
+    write.dstArrayElement = 0;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    write.descriptorCount = 1;
+    write.pImageInfo = &image_info;
+
+    vkUpdateDescriptorSets(device->device, 1, &write, 0, NULL);
 
     vk_buffer_destroy(staging);
     stbi_image_free(pixel);
@@ -107,4 +131,20 @@ void texture_destroy(texture_t *texture)
     vk_image_destroy(texture->image);
 
     free(texture);
+}
+
+void texture_bind(texture_t *texture, vk_pipeline_t *pipeline)
+{
+    VkCommandBuffer cmd = swapchain_get_buffer(texture->swapchain);
+
+    vkCmdBindDescriptorSets(
+        cmd,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipeline->layout,
+        0,
+        1,
+        &texture->descriptor,
+        0,
+        NULL
+    );
 }

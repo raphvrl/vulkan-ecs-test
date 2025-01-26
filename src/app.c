@@ -46,9 +46,9 @@ app_t *app_create(u32 w, u32 h, const char *title)
     vertex_t vertices[] = {
         // Front face
         {{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
         {{-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+        {{ 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{ 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
         // Back face
         {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
         {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
@@ -56,24 +56,24 @@ app_t *app_create(u32 w, u32 h, const char *title)
         {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
         // Left face
         {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
         {{-0.5f,  0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+        {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
         // Right face
         {{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
         {{ 0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+        {{ 0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+        {{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
         // Top face
         {{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
         {{ 0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{ 0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
         // Bottom face
         {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-        {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
         {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
-        {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}}
+        {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}}
     };
 
     // cube indices
@@ -95,6 +95,16 @@ app_t *app_create(u32 w, u32 h, const char *title)
     );
 
     if (!app->mesh) {
+        app_destroy(app);
+        return NULL;
+    }
+
+    app->texture = texture_create(
+        app->swapchain,
+        "assets/img/dog.jpg"
+    );
+
+    if (!app->texture) {
         app_destroy(app);
         return NULL;
     }
@@ -122,6 +132,8 @@ void app_destroy(app_t *app)
     }
 
     pipeline_manager_destroy(app->pipeline_manager);
+    
+    texture_destroy(app->texture);
     mesh_destroy(app->mesh);
 
     ecs_destroy(app->ecs);
@@ -139,7 +151,8 @@ void app_run(app_t *app)
     u32 id = ecs_new(app->registry);
     ecs_add(app->ecs, id, C_TRANSFORM, &DEFAULT_TRANSFORM);
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
-        .mesh = app->mesh
+        .mesh = app->mesh,
+        .texture = app->texture
     });
 
     id = ecs_new(app->registry);
@@ -160,6 +173,18 @@ void app_run(app_t *app)
         .aspect = (f32)app->window->width / (f32)app->window->height,
         .near_plane = 0.1f,
         .far_plane = 100.0f
+    });
+
+    id = ecs_new(app->registry);
+
+    ecs_add(app->ecs, id, C_TRANSFORM, &(c_transform_t){
+        .pos = {0.0f, 10.0f, 0.0f},
+        .scale = {1.0f, 1.0f, 1.0f}
+    });
+
+    ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
+        .mesh = app->mesh,
+        .texture = app->texture
     });
 
     while (app->window->open) {

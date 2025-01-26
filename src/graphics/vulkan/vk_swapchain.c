@@ -85,13 +85,14 @@ static void create_framebuffers(vk_swapchain_t *swapchain)
     swapchain->framebuffers = malloc(swapchain->image_count * sizeof(VkFramebuffer));
     for (u32 i = 0; i < swapchain->image_count; i++) {
         VkImageView attachments[] = {
-            swapchain->image_views[i]
+            swapchain->image_views[i],
+            swapchain->depth_images[i]->view
         };
 
         VkFramebufferCreateInfo framebuffer_info = {0};
         framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebuffer_info.renderPass = swapchain->render_pass;
-        framebuffer_info.attachmentCount = 1;
+        framebuffer_info.attachmentCount = 2;
         framebuffer_info.pAttachments = attachments;
         framebuffer_info.width = swapchain->extent.width;
         framebuffer_info.height = swapchain->extent.height;
@@ -100,6 +101,25 @@ static void create_framebuffers(vk_swapchain_t *swapchain)
         if (vkCreateFramebuffer(swapchain->device->device, &framebuffer_info, NULL, &swapchain->framebuffers[i]) != VK_SUCCESS) {
             LOG_ERROR("Failed to create framebuffer!");
         }
+    }
+}
+
+static void create_depth_resources(vk_swapchain_t *swapchain)
+{
+    vk_device_t *device = swapchain->device;
+
+    swapchain->depth_images = malloc(swapchain->image_count * sizeof(vk_image_t *));
+    for (u32 i = 0; i < swapchain->image_count; i++) {
+        swapchain->depth_images[i] = vk_image_create(
+            device,
+            swapchain->extent.width,
+            swapchain->extent.height,
+            VK_FORMAT_D32_SFLOAT,
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            VK_IMAGE_ASPECT_DEPTH_BIT
+        );
     }
 }
 
@@ -121,15 +141,35 @@ static void create_renderpass(vk_swapchain_t *swapchain)
     color_attachment_ref.attachment = 0;
     color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription depth_attachment = {0};
+    depth_attachment.format = VK_FORMAT_D32_SFLOAT;
+    depth_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depth_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depth_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depth_attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depth_attachment_ref = {0};
+    depth_attachment_ref.attachment = 1;
+    depth_attachment_ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkSubpassDescription subpass = {0};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &color_attachment_ref;
+    subpass.pDepthStencilAttachment = &depth_attachment_ref;
+
+    VkAttachmentDescription attachments[] = {
+        color_attachment,
+        depth_attachment
+    };
 
     VkRenderPassCreateInfo render_pass_info = {0};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    render_pass_info.attachmentCount = 1;
-    render_pass_info.pAttachments = &color_attachment;
+    render_pass_info.attachmentCount = 2;
+    render_pass_info.pAttachments = attachments;
     render_pass_info.subpassCount = 1;
     render_pass_info.pSubpasses = &subpass;
 
@@ -325,6 +365,7 @@ vk_swapchain_t *vk_swapchain_create(vk_device_t *device)
 
     create_swapchain(swapchain);
     create_image_views(swapchain);
+    create_depth_resources(swapchain);
     create_renderpass(swapchain);
     create_framebuffers(swapchain);
     create_command_buffer(swapchain);
@@ -375,6 +416,12 @@ static void cleanup_swapchain(vk_swapchain_t *swapchain)
     );
 
     for (u32 i = 0; i < swapchain->image_count; i++) {
+        vk_image_destroy(swapchain->depth_images[i]);
+    }
+
+    free(swapchain->depth_images);
+
+    for (u32 i = 0; i < swapchain->image_count; i++) {
         vkDestroyImageView(
             device->device,
             swapchain->image_views[i],
@@ -416,6 +463,7 @@ static void recreate_swapchain(vk_swapchain_t *swapchain)
 
     create_swapchain(swapchain);
     create_image_views(swapchain);
+    create_depth_resources(swapchain);
     create_renderpass(swapchain);
     create_framebuffers(swapchain);
     create_command_buffer(swapchain);
@@ -482,7 +530,10 @@ bool begin_frame(vk_swapchain_t *swapchain)
         LOG_ERROR("Failed to begin recording command buffer!");
     }
 
-    VkClearValue clear_color = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+    VkClearValue clear_values[2] = {0};
+
+    clear_values[0].color = (VkClearColorValue){{0.0f, 0.0f, 0.0f, 1.0f}};
+    clear_values[1].depthStencil = (VkClearDepthStencilValue){1.0f, 0};
 
     VkRenderPassBeginInfo render_pass_info = {0};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -490,8 +541,8 @@ bool begin_frame(vk_swapchain_t *swapchain)
     render_pass_info.framebuffer = swapchain->framebuffers[image_index];
     render_pass_info.renderArea.offset = (VkOffset2D){0, 0};
     render_pass_info.renderArea.extent = swapchain->extent;
-    render_pass_info.clearValueCount = 1;
-    render_pass_info.pClearValues = &clear_color;
+    render_pass_info.clearValueCount = 2;
+    render_pass_info.pClearValues = clear_values;
     
     vkCmdBeginRenderPass(
         command_buffer,

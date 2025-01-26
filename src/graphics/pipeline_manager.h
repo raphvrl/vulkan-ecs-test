@@ -34,3 +34,5 @@ void pipeline_manager_push_constant(
     u32 size,
     void *data
 );
+
+#define pipeline_manager_get(manager, type) (manager)->pipelines[type]

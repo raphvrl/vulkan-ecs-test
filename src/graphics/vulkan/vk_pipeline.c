@@ -2,7 +2,10 @@
 
 static char *read_file(const char *path, u32 *size)
 {
-    FILE *file = fopen(path, "rb");
+    char full_path[256];
+    snprintf(full_path, 256, "%s%s", SHADERS_PATH, path);
+
+    FILE *file = fopen(full_path, "rb");
     if (!file) {
         LOG_ERROR("Failed to open file!");
     }
@@ -136,7 +139,7 @@ vk_pipeline_t *vk_pipeline_create(
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_NONE;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
     VkPipelineMultisampleStateCreateInfo multisampling = {0};
@@ -150,6 +153,13 @@ vk_pipeline_t *vk_pipeline_create(
         VK_COLOR_COMPONENT_G_BIT |
         VK_COLOR_COMPONENT_B_BIT |
         VK_COLOR_COMPONENT_A_BIT;
+    color_blend_attachment.blendEnable = VK_TRUE;
+    color_blend_attachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    color_blend_attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    color_blend_attachment.colorBlendOp = VK_BLEND_OP_ADD;
+    color_blend_attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    color_blend_attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    color_blend_attachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
     VkPipelineColorBlendStateCreateInfo color_blending = {0};
     color_blending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -157,6 +167,16 @@ vk_pipeline_t *vk_pipeline_create(
     color_blending.logicOp = VK_LOGIC_OP_COPY;
     color_blending.attachmentCount = 1;
     color_blending.pAttachments = &color_blend_attachment;
+
+    VkPipelineDepthStencilStateCreateInfo depth_stencil = {0};
+    depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depth_stencil.depthTestEnable = VK_TRUE;
+    depth_stencil.depthWriteEnable = VK_TRUE;
+    depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depth_stencil.depthBoundsTestEnable = VK_FALSE;
+    depth_stencil.minDepthBounds = 0.0f;
+    depth_stencil.maxDepthBounds = 1.0f;
+    depth_stencil.stencilTestEnable = VK_FALSE;
 
     VkPushConstantRange push_constants[8] = {0};
     for (u32 i = 0; i < info.push_constant_count; i++) {
@@ -169,6 +189,8 @@ vk_pipeline_t *vk_pipeline_create(
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipeline_layout_info.pushConstantRangeCount = info.push_constant_count;
     pipeline_layout_info.pPushConstantRanges = push_constants;
+    pipeline_layout_info.setLayoutCount = info.descriptor_layout_count;
+    pipeline_layout_info.pSetLayouts = info.descriptor_layouts;
 
     VkResult res = vkCreatePipelineLayout(
         swapchain->device->device,
@@ -191,6 +213,7 @@ vk_pipeline_t *vk_pipeline_create(
     pipeline_info.pRasterizationState = &rasterizer;
     pipeline_info.pMultisampleState = &multisampling;
     pipeline_info.pColorBlendState = &color_blending;
+    pipeline_info.pDepthStencilState = &depth_stencil;
     pipeline_info.layout = pipeline->layout;
     pipeline_info.renderPass = swapchain->render_pass;
     pipeline_info.pDynamicState = &dynamic_state;

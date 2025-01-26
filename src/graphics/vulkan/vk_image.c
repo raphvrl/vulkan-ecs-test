@@ -28,7 +28,8 @@ vk_image_t *vk_image_create(
     VkFormat format,
     VkImageTiling tiling,
     VkImageUsageFlags usage,
-    VkMemoryPropertyFlags properties
+    VkMemoryPropertyFlags properties,
+    VkImageAspectFlags aspect_mask
 )
 {
     vk_image_t *image = malloc(sizeof(vk_image_t));
@@ -100,7 +101,7 @@ vk_image_t *vk_image_create(
     view_info.image = image->handle;
     view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
     view_info.format = format;
-    view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    view_info.subresourceRange.aspectMask = aspect_mask;
     view_info.subresourceRange.baseMipLevel = 0;
     view_info.subresourceRange.levelCount = 1;
     view_info.subresourceRange.baseArrayLayer = 0;

@@ -31,6 +31,8 @@ typedef struct vk_device {
     VkCommandPool command_pool;
     VkDescriptorPool descriptor_pool;
 
+    VkDescriptorSetLayout texture_layout;
+
     window_t *window;
 } vk_device_t;
 

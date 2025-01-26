@@ -10,6 +10,7 @@
 #include "graphics/vulkan/vk_pipeline.h"
 #include "graphics/pipeline_manager.h"
 #include "graphics/mesh.h"
+#include "graphics/texture.h"
 
 // main struct
 typedef struct app {
@@ -17,6 +18,8 @@ typedef struct app {
     vk_device_t *device;
     vk_swapchain_t *swapchain;
     mesh_t *mesh;
+    texture_t *texture;
+
     pipeline_manager_t *pipeline_manager;
 
 

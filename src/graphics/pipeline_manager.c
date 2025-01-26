@@ -3,11 +3,13 @@
 
 static void create_main_pipeline(pipeline_manager_t *manager)
 {
+    vk_device_t *device = manager->swapchain->device;
+
     vk_pipeline_t *pipeline = vk_pipeline_create(
         manager->swapchain,
         (vk_pipeline_info_t){
-            .vertex = "bin/default.vert.spv",
-            .fragment = "bin/default.frag.spv",
+            .vertex = "default.vert.spv",
+            .fragment = "default.frag.spv",
             .input = {
                 .binding = {
                     {
@@ -46,6 +48,10 @@ static void create_main_pipeline(pipeline_manager_t *manager)
                     .offset = 0,
                     .size = sizeof(mvp_pc_t)
                 }
+            },
+            .descriptor_layout_count = 1,
+            .descriptor_layouts = {
+                device->texture_layout
             }
         }
     );

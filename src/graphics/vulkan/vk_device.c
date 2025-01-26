@@ -14,6 +14,31 @@ const char *device_extensions[] = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
+static void create_texture_layout(vk_device_t *device)
+{
+    VkDescriptorSetLayoutBinding layout_binding = {0};
+    layout_binding.binding = 0;
+    layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    layout_binding.descriptorCount = 1;
+    layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    VkDescriptorSetLayoutCreateInfo layout_info = {0};
+    layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layout_info.bindingCount = 1;
+    layout_info.pBindings = &layout_binding;
+
+    VkResult res = vkCreateDescriptorSetLayout(
+        device->device,
+        &layout_info,
+        NULL,
+        &device->texture_layout
+    );
+
+    if (res != VK_SUCCESS) {
+        LOG_ERROR("Failed to create descriptor set layout!");
+    }
+}
+
 static void create_descriptor_pool(vk_device_t *device)
 {
     VkDescriptorPoolSize pool_sizes[2] = {0};
@@ -409,6 +434,8 @@ vk_device_t *vk_device_create(window_t *window)
     create_command_pool(device);
     create_descriptor_pool(device);
 
+    create_texture_layout(device);
+
     return device;
 }
 
@@ -417,6 +444,8 @@ void vk_device_destroy(vk_device_t *device)
     if (!device) {
         return;
     }
+
+    vkDestroyDescriptorSetLayout(device->device, device->texture_layout, NULL);
 
     vkDestroyDescriptorPool(device->device, device->descriptor_pool, NULL);
     vkDestroyCommandPool(device->device, device->command_pool, NULL);

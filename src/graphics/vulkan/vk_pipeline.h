@@ -7,6 +7,10 @@
 #include "core/types.h"
 #include "vk_swapchain.h"
 
+// shaders path
+#define SHADERS_PATH "bin/shaders/"
+
+// main struct
 typedef struct vk_pipeline {
     vk_swapchain_t *swapchain;
 
@@ -17,6 +21,7 @@ typedef struct vk_pipeline {
     VkShaderModule fragment;
 } vk_pipeline_t;
 
+// helper structs
 typedef struct vk_pipeline_vertex_input_t {
     VkVertexInputBindingDescription binding[8];
     u32 binding_count;
@@ -36,7 +41,8 @@ typedef struct vk_pipeline_info {
     vk_pipeline_vertex_input_t input;
     u32 push_constant_count;
     vk_pipeline_push_constant_t push_constants[8];
-    VkDescriptorSetLayout descriptor_layouts;
+    u32 descriptor_layout_count;
+    VkDescriptorSetLayout descriptor_layouts[8];
 } vk_pipeline_info_t;
 
 // constructor and destructor

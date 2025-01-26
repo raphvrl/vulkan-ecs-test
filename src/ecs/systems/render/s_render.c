@@ -66,6 +66,11 @@ static void draw_mesh(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
                 &data
             );
 
+            texture_bind(
+                model->texture,
+                pipeline_manager->pipelines[MAIN_PIPELINE]
+            );
+
             mesh_bind(model->mesh);
             mesh_draw(model->mesh);
         }

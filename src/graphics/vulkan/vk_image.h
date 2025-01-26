@@ -26,7 +26,8 @@ vk_image_t *vk_image_create(
     VkFormat format,
     VkImageTiling tiling,
     VkImageUsageFlags usage,
-    VkMemoryPropertyFlags properties
+    VkMemoryPropertyFlags properties,
+    VkImageAspectFlags aspect_mask
 );
 
 // destructor

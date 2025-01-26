@@ -4,6 +4,7 @@
 
 #include "core/types.h"
 #include "vk_device.h"
+#include "vk_image.h"
 
 typedef struct swapchain_support_details {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -26,6 +27,8 @@ typedef struct vk_swapchain {
     VkImageView *image_views;
     u32 image_count;
 
+    vk_image_t **depth_images;
+
     VkRenderPass render_pass;
     VkFramebuffer *framebuffers;
 
@@ -46,3 +49,6 @@ void vk_swapchain_destroy(vk_swapchain_t *swapchain);
 // actions
 bool begin_frame(vk_swapchain_t *swapchain);
 void end_frame(vk_swapchain_t *swapchain);
+
+// getters
+#define swapchain_get_buffer(swapchain) (swapchain)->command_buffers[(swapchain)->image_index]
