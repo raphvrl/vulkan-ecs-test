@@ -140,12 +140,13 @@ $(CIMGUI_BIN): $(CIMGUI_STAMP)
 
 $(CIMGUI_STAMP):
 	@$(PRINT) "Compiling cimgui"
-	@$(MKDIR) $(dir $@)
+	@$(MKDIR) $(BIN_DIR)
 	@$(MAKE) -C $(CIMGUI_DIR) static
 	@touch $@
 
 $(SUBMODULES):
 	@$(PRINT) "Initializing submodules"
+	@$(MKDIR) $(BIN_DIR)
 	@git submodule update --init --recursive
 	@touch $@
 
