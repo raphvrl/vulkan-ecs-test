@@ -32,7 +32,6 @@ DEC_SYSTEM(physics)
 DEC_SYSTEM(render)
 DEC_SYSTEM(camera)
 DEC_SYSTEM(control)
-DEC_SYSTEM(gui)
 
 // constructor and destructor
 ecs_t *ecs_create(ecs_info_t *info);

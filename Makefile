@@ -1,5 +1,7 @@
 ifdef MSYSTEM
 	CC = gcc
+	CXX = g++
+	AR = ar
 
 	RM = rm -rf
 	CP = cp
@@ -12,6 +14,8 @@ ifdef MSYSTEM
 	CMAKE_BUILD = cmake --build
 else ifeq ($(OS), Linux)
 	CC = gcc
+	CXX = g++
+	AR = ar
 
 	RM = rm -rf
 	CP = cp
@@ -92,13 +96,8 @@ CGTLF_INC := $(CGTLF_DIR)
 
 LDFLAGS += -I$(CGTLF_INC)
 
-# cimgui
-CIMGUI_DIR := $(LIB_DIR)/cimgui
-CIMGUI_INC := $(CIMGUI_DIR)
-CIMGUI_BIN = libcimgui.a
-CIMGUI_STAMP = $(BIN_DIR)/.cimgui_compiled
-
-LDFLAGS += -I$(CIMGUI_INC) -L$(CIMGUI_DIR) -lcimgui -lstdc++ -static-libstdc++ -static-libgcc
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Werror
+	
 
 # shader
 SHADER_DIR := shaders
@@ -107,7 +106,7 @@ SHADER_SRC := $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_SPV := $(patsubst $(SHADER_DIR)/%.vert, $(SHADER_BIN)/%.vert.spv, $(SHADER_SRC))
 SHADER_SPV += $(patsubst $(SHADER_DIR)/%.frag, $(SHADER_BIN)/%.frag.spv, $(SHADER_SRC))
 
-all: $(GLFW_BIN) $(CIMGUI_BIN) $(TARGET) $(SHADER_SPV)
+all: $(GLFW_BIN) $(TARGET) $(SHADER_SPV)
 
 $(TARGET): $(OBJ)
 	@$(PRINT) "Linking $@"
@@ -135,14 +134,6 @@ $(GLFW_BIN): $(SUBMODULES)
 	@$(MKDIR) $(GLFW_BIN)
 	@$(CMAKE) -S $(GLFW_DIR) -B $(GLFW_BIN) $(GLFW_FLAGS)
 	@$(CMAKE_BUILD) $(GLFW_BIN)
-
-$(CIMGUI_BIN): $(CIMGUI_STAMP)
-
-$(CIMGUI_STAMP):
-	@$(PRINT) "Compiling cimgui"
-	@$(MKDIR) $(BIN_DIR)
-	@$(MAKE) -C $(CIMGUI_DIR) static
-	@touch $@
 
 $(SUBMODULES):
 	@$(PRINT) "Initializing submodules"

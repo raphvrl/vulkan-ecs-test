@@ -108,7 +108,7 @@ void app_run(app_t *app)
     u32 id = ecs_new(app->registry);
     ecs_add(app->ecs, id, C_TRANSFORM, &DEFAULT_TRANSFORM);
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
-        .mesh = asset_manager_get_mesh(app->asset_manager, "cube"),
+        .mesh = asset_manager_get_mesh(app->asset_manager, "monkey"),
         .texture = asset_manager_get_texture(app->asset_manager, "gru")
     });
 
