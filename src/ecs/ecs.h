@@ -5,6 +5,7 @@
 #include "ecs/components/component_manager.h"
 #include "core/window/window.h"
 #include "graphics/pipeline_manager.h"
+#include "graphics/gui_manager.h"
 
 // info struct
 typedef struct ecs_info {
@@ -13,6 +14,8 @@ typedef struct ecs_info {
 
     window_t *window;
     pipeline_manager_t *pipeline_manager;
+
+    gui_manager_t *gui_manager;
 } ecs_info_t;
 
 // main struct
@@ -22,6 +25,8 @@ typedef struct ecs {
 
     window_t *window;
     pipeline_manager_t *pipeline_manager;
+
+    gui_manager_t *gui_manager;
 } ecs_t;
 
 // systems

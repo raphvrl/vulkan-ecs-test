@@ -12,8 +12,10 @@
 typedef struct window {
     // handle
     GLFWwindow *handle;
-    u32 width;
-    u32 height;
+    u32 w;
+    u32 h;
+    u32 x;
+    u32 y;
 
     // open
     bool open;
@@ -29,12 +31,12 @@ typedef struct window {
     bool mouses[GLFW_MOUSE_BUTTON_LAST];
 
     // mouse pos
-    f32 x;
-    f32 y;
+    f32 mx;
+    f32 my;
 
     // mouse delta
-    f32 rx;
-    f32 ry;
+    f32 rdx;
+    f32 rdy;
 
     // resize
     bool resized;
@@ -188,6 +190,7 @@ void window_destroy(window_t *win);
 
 // action
 void window_update(window_t *win);
+void window_close(window_t *win);
 
 // hide
 #define window_mouse_hide(win) \
@@ -196,4 +199,7 @@ void window_update(window_t *win);
 
 #define window_mouse_show(win) \
     glfwSetInputMode((win)->handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+
+// change screen status
+void window_set_fullscreen(window_t *win, bool fullscreen);
 

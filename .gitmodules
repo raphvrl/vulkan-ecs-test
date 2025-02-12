@@ -10,3 +10,6 @@
 [submodule "lib/cgltf"]
 	path = lib/cgltf
 	url = https://github.com/jkuhlmann/cgltf.git
+[submodule "lib/cimgui"]
+	path = lib/cimgui
+	url = https://github.com/raphvrl/cimgui.git

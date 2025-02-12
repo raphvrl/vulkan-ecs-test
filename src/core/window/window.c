@@ -7,8 +7,8 @@ static void resize_callback(GLFWwindow *window, int width, int height)
     window_t *win = glfwGetWindowUserPointer(window);
     if (!win) { return; }
 
-    win->width = width;
-    win->height = height;
+    win->w = width;
+    win->h = height;
     win->resized = true;
 }
 
@@ -46,11 +46,11 @@ static void mouse_pos_callback(GLFWwindow *window, f64 x, f64 y)
     window_t *win = glfwGetWindowUserPointer(window);
     if (!win) { return; }
 
-    win->rx = x - win->x;
-    win->ry = y - win->y;
+    win->rdx = x - win->mx;
+    win->rdy = y - win->my;
 
-    win->x = x;
-    win->y = y;
+    win->mx = x;
+    win->my = y;
 }
 
 window_t *window_create(u32 w, u32 h, const char *title)
@@ -60,8 +60,8 @@ window_t *window_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
-    win->width = w;
-    win->height = h;
+    win->w = w;
+    win->h = h;
     win->open = true;
     win->last_time = glfwGetTime();
     win->dt = 0.0f;
@@ -69,11 +69,11 @@ window_t *window_create(u32 w, u32 h, const char *title)
     memset(win->keys, 0, sizeof(win->keys));
     memset(win->mouses, 0, sizeof(win->mouses));
 
-    win->x = 0.0f;
-    win->y = 0.0f;
+    win->mx = 0.0f;
+    win->my = 0.0f;
 
-    win->rx = 0.0f;
-    win->ry = 0.0f;
+    win->rdx = 0.0f;
+    win->rdy = 0.0f;
 
     win->resized = false;
 
@@ -117,8 +117,8 @@ void window_update(window_t *win)
 {
     if (!win) { return; }
 
-    win->rx = 0.0f;
-    win->ry = 0.0f;
+    win->rdx = 0.0f;
+    win->rdy = 0.0f;
 
     glfwPollEvents();
 
@@ -127,4 +127,37 @@ void window_update(window_t *win)
     f64 now = glfwGetTime();
     win->dt = now - win->last_time;
     win->last_time = now;
+}
+
+void window_close(window_t *win)
+{
+    if (!win) { return; }
+
+    glfwSetWindowShouldClose(win->handle, GLFW_TRUE);
+}
+
+void window_set_fullscreen(window_t *win, bool fullscreen)
+{
+    if (!win) { return; }
+
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+    if (fullscreen) {
+        glfwSetWindowMonitor(
+            win->handle,
+            monitor,
+            0, 0,
+            mode->width, mode->height,
+            mode->refreshRate
+        );
+    } else {
+        glfwSetWindowMonitor(
+            win->handle,
+            NULL,
+            0, 0,
+            win->w, win->h,
+            mode->refreshRate
+        );
+    }
 }

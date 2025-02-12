@@ -18,10 +18,6 @@ void map_destroy(map_t *map)
 {
     if (!map) { return; }
 
-    for (usize i = 0; i < map->size; i++) {
-        free(map->pairs[i].key);
-    }
-
     free(map->pairs);
     free(map);
 }
@@ -32,9 +28,10 @@ void map_put(map_t *map, const char *key, void *value)
 
     for (usize i = 0; i < map->capacity; i++) {
         if (!map->pairs[i].used) {
-            map->pairs[i].key = strdup(key);
+            strcpy(map->pairs[i].key, key);
             map->pairs[i].value = value;
             map->pairs[i].used = true;
+
             map->size++;
             return;
         }
@@ -47,9 +44,10 @@ void map_put(map_t *map, const char *key, void *value)
         map->pairs[i].used = false;
     }
 
-    map->pairs[map->size].key = strdup(key);
+    strcpy(map->pairs[map->size].key, key);
     map->pairs[map->size].value = value;
     map->pairs[map->size].used = true;
+
     map->size++;
 }
 
@@ -60,9 +58,9 @@ void map_remove(map_t *map, const char *key)
     for (usize i = 0; i < map->capacity; i++) {
         if (map->pairs[i].used && strcmp(map->pairs[i].key, key) == 0) {
             free(map->pairs[i].key);
-            map->pairs[i].key = NULL;
             map->pairs[i].value = NULL;
             map->pairs[i].used = false;
+
             map->size--;
             return;
         }
@@ -78,6 +76,13 @@ void *map_get(map_t *map, const char *key)
     }
 
     return NULL;
+}
+
+const char *map_get_key(map_t *map, usize i)
+{
+    if (i >= map->size) { return NULL; }
+
+    return map->pairs[i].key;
 }
 
 void map_print(map_t *map)

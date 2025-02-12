@@ -8,7 +8,7 @@
 #define GROWTH_FACTOR 2
 
 typedef struct pair {
-    char *key;
+    char key[256];
     void *value;
     bool used;
 } pair_t;
@@ -28,6 +28,7 @@ void map_destroy(map_t *map);
 void map_put(map_t *map, const char *key, void *value);
 void map_remove(map_t *map, const char *key);
 void *map_get(map_t *map, const char *key);
+const char *map_get_key(map_t *map, usize i);
 
 #define map_pair(map, i) (&(map)->pairs[i])
 

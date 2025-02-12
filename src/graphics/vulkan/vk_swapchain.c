@@ -274,7 +274,7 @@ static void create_swapchain(vk_swapchain_t *swapchain)
     VkSurfaceFormatKHR format = details.formats[0];
     for (u32 i = 0; i < details.format_count; i++) {
         if (
-            details.formats[i].format == VK_FORMAT_B8G8R8A8_SRGB &&
+            details.formats[i].format == VK_FORMAT_B8G8R8A8_UNORM &&
             details.formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
         ) {
             format = details.formats[i];
@@ -348,6 +348,7 @@ static void create_swapchain(vk_swapchain_t *swapchain)
 
     swapchain->format = format.format;
     swapchain->extent = extent;
+    swapchain->minimum_image_count = details.capabilities.minImageCount;
     swapchain->image_count = image_count;
 
     free(details.formats);

@@ -13,16 +13,16 @@ typedef struct vk_image {
     VkImage handle;
     VkDeviceMemory memory;
     VkImageView view;
-    u32 width;
-    u32 height;
+    u32 w;
+    u32 h;
     VkFormat format;
 } vk_image_t;
 
 // constructor
 vk_image_t *vk_image_create(
     vk_device_t *device,
-    u32 width,
-    u32 height,
+    u32 w,
+    u32 h,
     VkFormat format,
     VkImageTiling tiling,
     VkImageUsageFlags usage,

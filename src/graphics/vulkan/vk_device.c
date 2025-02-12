@@ -41,17 +41,24 @@ static void create_texture_layout(vk_device_t *device)
 
 static void create_descriptor_pool(vk_device_t *device)
 {
-    VkDescriptorPoolSize pool_sizes[2] = {0};
-    pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    pool_sizes[0].descriptorCount = 1000;
-    pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pool_sizes[1].descriptorCount = 1000;
+    VkDescriptorPoolSize pool_sizes[] = {
+        {
+            .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1000
+        },
+        {
+            .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1000
+        }
+    };
 
-    VkDescriptorPoolCreateInfo pool_info = {0};
-    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    pool_info.poolSizeCount = ARR_LEN(pool_sizes);
-    pool_info.pPoolSizes = pool_sizes;
-    pool_info.maxSets = 1000;
+    VkDescriptorPoolCreateInfo pool_info = {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = ARR_LEN(pool_sizes),
+        .pPoolSizes = pool_sizes,
+        .maxSets = 1000,
+        .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT
+    };
 
     VkResult res = vkCreateDescriptorPool(
         device->device,

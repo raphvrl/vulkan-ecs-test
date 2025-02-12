@@ -11,5 +11,5 @@
 #define WORD_BUFFER 256
 
 // actions
-void draw_box(const char *str, u32 width);
-void draw_2box(const char *top, const char *bottom, u32 width);
+void draw_box(const char *str, u32 w);
+void draw_2box(const char *top, const char *bottom, u32 w);

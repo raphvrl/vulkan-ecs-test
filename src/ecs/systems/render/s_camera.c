@@ -21,7 +21,7 @@ void s_camera_tick(ecs_t *ecs, f32 dt)
             camera->pos[1] = transform->pos[1];
             camera->pos[2] = transform->pos[2];
             
-            camera->aspect = (f32)ecs->window->width / (f32)ecs->window->height;
+            camera->aspect = (f32)ecs->window->w / (f32)ecs->window->h;
 
             v3 front;
             front[0] = cosf(glm_rad(camera->yaw)) * cosf(glm_rad(camera->pitch));
@@ -47,7 +47,7 @@ void s_camera_tick(ecs_t *ecs, f32 dt)
                 camera->proj
             );
 
-            // flip the y axis for vulkan
+            // flip the my axis for vulkan
             camera->proj[1][1] *= -1.0f;
         }
     }

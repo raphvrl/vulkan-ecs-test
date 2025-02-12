@@ -39,8 +39,8 @@ vk_image_t *vk_image_create(
 
     image->device = device;
 
-    image->width = width;
-    image->height = height;
+    image->w = width;
+    image->h = height;
     image->format = format;
 
     VkImageCreateInfo image_info = {0};
@@ -248,8 +248,8 @@ void vk_image_copy_from_buffer(
     region.imageSubresource.layerCount = 1;
     region.imageOffset = (VkOffset3D){0, 0, 0};
     region.imageExtent = (VkExtent3D){
-        .width = image->width,
-        .height = image->height,
+        .width = image->w,
+        .height = image->h,
         .depth = 1
     };
 

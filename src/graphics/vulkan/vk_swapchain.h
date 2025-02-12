@@ -25,6 +25,7 @@ typedef struct vk_swapchain {
     VkExtent2D extent;
     VkImage *images;
     VkImageView *image_views;
+    u32 minimum_image_count;
     u32 image_count;
 
     vk_image_t **depth_images;

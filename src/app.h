@@ -10,6 +10,8 @@
 #include "graphics/vulkan/vk_pipeline.h"
 #include "graphics/pipeline_manager.h"
 #include "graphics/asset_manager.h"
+#include "graphics/cimgui/cimgui_ctx.h"
+#include "graphics/gui_manager.h"
 
 // main struct
 typedef struct app {
@@ -19,10 +21,12 @@ typedef struct app {
 
     pipeline_manager_t *pipeline_manager;
     asset_manager_t *asset_manager;
+    gui_manager_t *gui_manager;
 
     component_manager_t *component_manager;
     registry_t *registry;
     ecs_t *ecs;
+
 } app_t;
 
 // constructor and destructor

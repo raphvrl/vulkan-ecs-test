@@ -9,10 +9,10 @@ texture_t *texture_create(vk_swapchain_t *swapchain, const char *path)
 
     texture->swapchain = swapchain;
 
-    int width, height, channels;
+    int w, height, channels;
     unsigned char *pixel = stbi_load(
         path,
-        &width,
+        &w,
         &height,
         &channels,
         STBI_rgb_alpha
@@ -23,7 +23,7 @@ texture_t *texture_create(vk_swapchain_t *swapchain, const char *path)
         return NULL;
     }
 
-    VkDeviceSize image_size = width * height * 4;
+    VkDeviceSize image_size = w * height * 4;
 
     vk_device_t *device = swapchain->device;
 
@@ -49,7 +49,7 @@ texture_t *texture_create(vk_swapchain_t *swapchain, const char *path)
 
     texture->image = vk_image_create(
         device,
-        width,
+        w,
         height,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,

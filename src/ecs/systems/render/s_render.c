@@ -1,4 +1,5 @@
 #include "ecs/ecs.h"
+#include "graphics/cimgui/cimgui_ctx.h"
 
 static void draw_mesh(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
 {
@@ -77,6 +78,24 @@ static void draw_mesh(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
     }
 }
 
+static void draw_gui(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
+{
+    UNUSED(pipeline_manager);
+
+    vk_swapchain_t *swapchain = pipeline_manager->swapchain;
+    VkCommandBuffer command_buffer = swapchain_get_buffer(swapchain);
+
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    igNewFrame();
+
+    gui_manager_t *gui_manager = ecs->gui_manager;
+    gui_manager_update(gui_manager);
+
+    igRender();
+    ImGui_ImplVulkan_RenderDrawData(igGetDrawData(), command_buffer, VK_NULL_HANDLE);
+}
+
 void s_render_tick(ecs_t *ecs, f32 dt)
 {
     UNUSED(dt);
@@ -87,6 +106,7 @@ void s_render_tick(ecs_t *ecs, f32 dt)
     if (!begin_frame(swapchain)) { return; };
 
     draw_mesh(ecs, pipeline_manager);
+    draw_gui(ecs, pipeline_manager);
 
     end_frame(swapchain);
 }

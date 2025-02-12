@@ -11,6 +11,7 @@ ecs_t *ecs_create(ecs_info_t *info)
     ecs->component_manager = info->component_manager;
     ecs->window = info->window;
     ecs->pipeline_manager = info->pipeline_manager;
+    ecs->gui_manager = info->gui_manager;
 
     return ecs;
 }

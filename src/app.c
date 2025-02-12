@@ -30,6 +30,8 @@ app_t *app_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
+    window_set_fullscreen(app->window, true);
+
     app->device = vk_device_create(app->window);
     if (!app->device) {
         app_destroy(app);
@@ -38,6 +40,11 @@ app_t *app_create(u32 w, u32 h, const char *title)
 
     app->swapchain = vk_swapchain_create(app->device);
     if (!app->swapchain) {
+        app_destroy(app);
+        return NULL;
+    }
+
+    if (!cimgui_ctx_create(app->swapchain)) {
         app_destroy(app);
         return NULL;
     }
@@ -69,7 +76,9 @@ app_t *app_create(u32 w, u32 h, const char *title)
         "gru"
     );
 
+    
     app->component_manager = component_manager_create();
+
     app->registry = registry_create();
     app->component_manager = component_manager_create();
     app->ecs = ecs_create(
@@ -77,9 +86,14 @@ app_t *app_create(u32 w, u32 h, const char *title)
             .registry = app->registry,
             .component_manager = app->component_manager,
             .window = app->window,
-            .pipeline_manager = app->pipeline_manager
+            .pipeline_manager = app->pipeline_manager,
+            .gui_manager = NULL
         }
     );
+
+    app->gui_manager = gui_manager_create(app->ecs, app->asset_manager);
+
+    app->ecs->gui_manager = app->gui_manager;
 
     return app;
 }
@@ -90,6 +104,8 @@ void app_destroy(app_t *app)
         return;
     }
 
+    gui_manager_destroy(app->gui_manager);
+
     asset_manager_destroy(app->asset_manager);
     pipeline_manager_destroy(app->pipeline_manager);
 
@@ -97,6 +113,7 @@ void app_destroy(app_t *app)
     component_manager_destroy(app->component_manager);
     registry_destroy(app->registry);
 
+    cimgui_ctx_destroy();
     vk_swapchain_destroy(app->swapchain);
     vk_device_destroy(app->device);
     window_destroy(app->window);
@@ -127,7 +144,7 @@ void app_run(app_t *app)
         .yaw = -90.0f,
         .pitch = 0.0f,
         .fov = 45.0f,
-        .aspect = (f32)app->window->width / (f32)app->window->height,
+        .aspect = (f32)app->window->w / (f32)app->window->h,
         .near_plane = 0.1f,
         .far_plane = 100.0f
     });

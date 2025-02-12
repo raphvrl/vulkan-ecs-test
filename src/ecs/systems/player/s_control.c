@@ -5,10 +5,10 @@
 
 #define WORLD_UP (v3){0.0f, 1.0f, 0.0f}
 
-static void mouse_control(c_camera_t *camera, f32 x, f32 y)
+static void mouse_control(c_camera_t *camera, f32 mx, f32 my)
 {
-    camera->yaw += x * SENSITIVITY;
-    camera->pitch -= y * SENSITIVITY;
+    camera->yaw += mx * SENSITIVITY;
+    camera->pitch -= my * SENSITIVITY;
 
     if (camera->pitch > 89.0f) {
         camera->pitch = 89.0f;
@@ -66,10 +66,14 @@ void s_control_tick(ecs_t *ecs, f32 dt)
             glm_vec3_scale(velocity->pos, CAMERA_SPEED, velocity->pos);
 
             if (ecs->window->mouses[M_BUTTON_RIGHT]) {
-                mouse_control(camera, ecs->window->rx, ecs->window->ry);
+                mouse_control(camera, ecs->window->rdx, ecs->window->rdy);
                 window_mouse_hide(ecs->window);
             } else {
                 window_mouse_show(ecs->window);
+            }
+
+            if (ecs->window->keys[K_ESCAPE]) {
+                window_close(ecs->window);
             }
         }
     }
