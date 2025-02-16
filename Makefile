@@ -22,12 +22,14 @@ LIB_DIR = lib
 
 SRC = $(shell find $(SRC_DIR) -name "*.c")
 
-OBJ = $(SRC:$(SRC_DIR)/%.c=$(BIN_DIR)/%.o)
-DEP = $(OBJ:.o=.d)
+OBJ = $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(SRC))
+DEP = $(pathsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.d,$(SRC))
 
-CFLAGS = -MMD -MP -I$(SRC_DIR)
+CFLAGS = -I$(SRC_DIR)
 
 -include $(DEP)
+
+TARGET = app
 
 ifeq ($(OS), Windows_NT)
 	TARGET = app.exe
@@ -121,19 +123,20 @@ GLSLC = $(VULKAN_SDK)/Bin/glslc.exe
 SHADER_DIR = shaders
 SHADER_BIN = $(BIN_DIR)/shaders
 SHADER_SRC = $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
-SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
-			 $(SHADER_SRC:$(SHADER_DIR)/%.frag=$(SHADER_BIN)/%.frag.spv)
+SHADER_DST = $(pathsubst $(SHADER_DIR)/%.vert,$(SHADER_BIN)/%.vert.spv,$(SHADER_SRC)) \
+			 $(pathsubst $(SHADER_DIR)/%.frag,$(SHADER_BIN)/%.frag.spv,$(SHADER_SRC))
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ) $(CPP_OBJ) $(SHADER_DST) | $(GLFW_STAMP)
 	@$(PRINT) "Linking $@"
-	@$(CXX) $(OBJ) $(CPP_OBJ) $(LDFLAGS) -o $@
+	@$(CXX) $^ $(LDFLAGS) -o $@
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
-	@$(PRINT) "Compiling $<"
+	@$(PRINT) "Compiling $< -> $@"
 	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+	@$(CC) $(CFLAGS) -MM $< > $(BIN_DIR)/$*.d
 
 $(BIN_DIR)/%.o: %.cpp
 	@$(PRINT) "Compiling $<"

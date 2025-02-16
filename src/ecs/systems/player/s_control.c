@@ -76,8 +76,8 @@ static void player_control(ecs_t *ecs, u32 i)
 
 static void editor_control(ecs_t *ecs)
 {
-    if (!ecs->window->keys[K_K]) {
-        printf("F1sdqsdqd\n");
+    if (window_key_down(ecs->window, K_F1)) {
+        SWITCH_BOOL(&ecs->gui->entity_list.active);
     }
 }
 
