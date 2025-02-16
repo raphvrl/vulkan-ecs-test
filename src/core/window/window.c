@@ -117,6 +117,8 @@ void window_update(window_t *win)
 {
     if (!win) { return; }
 
+    memcpy(win->prev_keys, win->keys, sizeof(win->keys));
+
     win->rdx = 0.0f;
     win->rdy = 0.0f;
 

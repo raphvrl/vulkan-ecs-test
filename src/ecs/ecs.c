@@ -11,7 +11,6 @@ ecs_t *ecs_create(ecs_info_t *info)
     ecs->component_manager = info->component_manager;
     ecs->window = info->window;
     ecs->pipeline_manager = info->pipeline_manager;
-    ecs->gui_manager = info->gui_manager;
 
     return ecs;
 }
@@ -27,8 +26,8 @@ void ecs_update(ecs_t *ecs, f32 dt)
 {
     s_control_tick(ecs, dt);
     s_physics_tick(ecs, dt);
-    s_render_tick(ecs, dt);
     s_camera_tick(ecs, dt);
+    s_render_tick(ecs, dt);
 }
 
 void ecs_add(ecs_t *ecs, u32 id, component_type_e component, void *data)

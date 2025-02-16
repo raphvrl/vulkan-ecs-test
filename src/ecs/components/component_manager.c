@@ -51,5 +51,5 @@ void *component_manager_get(
 )
 {
     component_list_t *list = &manager->lists[component];
-    return (char *)list->data + (list->size * id);
+    return (void *)((char *)list->data + (list->size * id));
 }

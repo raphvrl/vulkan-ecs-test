@@ -7,9 +7,10 @@ map_t *map_create(void)
         return NULL;
     }
 
-    map->size = 0;
+    map->keys = calloc(INITAL_CAPACITY, sizeof(char *));
+    map->values = calloc(INITAL_CAPACITY, sizeof(void *));
     map->capacity = INITAL_CAPACITY;
-    map->pairs = calloc(map->capacity, sizeof(pair_t));
+    map->size = 0;
 
     return map;
 }
@@ -18,49 +19,49 @@ void map_destroy(map_t *map)
 {
     if (!map) { return; }
 
-    free(map->pairs);
+    for (usize i = 0; i < map->size; i++) {
+        free(map->keys[i]);
+    }
+
+    free(map->keys);
+    free(map->values);
+
     free(map);
 }
 
 void map_put(map_t *map, const char *key, void *value)
 {
-    if (map == NULL || key == NULL) { return; }
+    if (!map || !key) { return; }
 
-    for (usize i = 0; i < map->capacity; i++) {
-        if (!map->pairs[i].used) {
-            strcpy(map->pairs[i].key, key);
-            map->pairs[i].value = value;
-            map->pairs[i].used = true;
-
-            map->size++;
+    for (usize i = 0; i < map->size; i++) {
+        if (strcmp(map->keys[i], key) == 0) {
+            map->values[i] = value;
             return;
         }
     }
 
-    map->capacity *= GROWTH_FACTOR;
-    map->pairs = realloc(map->pairs, map->capacity * sizeof(pair_t));
-
-    for (usize i = map->size; i < map->capacity; i++) {
-        map->pairs[i].used = false;
+    if (map->size >= map->capacity) {
+        map->capacity *= GROWTH_FACTOR;
+        map->keys = realloc(map->keys, map->capacity * sizeof(char *));
+        map->values = realloc(map->values, map->capacity * sizeof(void *));
     }
 
-    strcpy(map->pairs[map->size].key, key);
-    map->pairs[map->size].value = value;
-    map->pairs[map->size].used = true;
-
+    map->keys[map->size] = strdup(key);
+    map->values[map->size] = value;
     map->size++;
+
+    return;
 }
 
 void map_remove(map_t *map, const char *key)
 {
     if (!map || !key) return;
 
-    for (usize i = 0; i < map->capacity; i++) {
-        if (map->pairs[i].used && strcmp(map->pairs[i].key, key) == 0) {
-            free(map->pairs[i].key);
-            map->pairs[i].value = NULL;
-            map->pairs[i].used = false;
-
+    for (usize i = 0; i < map->size; i++) {
+        if (strcmp(map->keys[i], key) == 0) {
+            free(map->keys[i]);
+            map->keys[i] = NULL;
+            map->values[i] = NULL;
             map->size--;
             return;
         }
@@ -69,9 +70,11 @@ void map_remove(map_t *map, const char *key)
 
 void *map_get(map_t *map, const char *key)
 {
+    if (!map || !key) { return NULL; }
+
     for (usize i = 0; i < map->size; i++) {
-        if (map->pairs[i].used && strcmp(map->pairs[i].key, key) == 0) {
-            return map->pairs[i].value;
+        if (strcmp(map->keys[i], key) == 0) {
+            return map->values[i];
         }
     }
 
@@ -82,12 +85,5 @@ const char *map_get_key(map_t *map, usize i)
 {
     if (i >= map->size) { return NULL; }
 
-    return map->pairs[i].key;
-}
-
-void map_print(map_t *map)
-{
-    for (usize i = 0; i < map->size; i++) {
-        printf("%s: %p\n", map->pairs[i].key, map->pairs[i].value);
-    }
+    return map->keys[i];
 }

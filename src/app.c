@@ -3,6 +3,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <locale.h>
 #endif
 
 static void setup_utf8()
@@ -86,14 +88,12 @@ app_t *app_create(u32 w, u32 h, const char *title)
             .registry = app->registry,
             .component_manager = app->component_manager,
             .window = app->window,
-            .pipeline_manager = app->pipeline_manager,
-            .gui_manager = NULL
+            .pipeline_manager = app->pipeline_manager
         }
     );
 
-    app->gui_manager = gui_manager_create(app->ecs, app->asset_manager);
-
-    app->ecs->gui_manager = app->gui_manager;
+    app->gui = gui_create(app->ecs, app->asset_manager);
+    app->ecs->gui = app->gui;
 
     return app;
 }
@@ -104,7 +104,9 @@ void app_destroy(app_t *app)
         return;
     }
 
-    gui_manager_destroy(app->gui_manager);
+    vkDeviceWaitIdle(app->device->device);
+
+    gui_destroy(app->gui);
 
     asset_manager_destroy(app->asset_manager);
     pipeline_manager_destroy(app->pipeline_manager);
@@ -126,7 +128,9 @@ void app_run(app_t *app)
     ecs_add(app->ecs, id, C_TRANSFORM, &DEFAULT_TRANSFORM);
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
         .mesh = asset_manager_get_mesh(app->asset_manager, "monkey"),
-        .texture = asset_manager_get_texture(app->asset_manager, "gru")
+        .texture = asset_manager_get_texture(app->asset_manager, "gru"),
+        .mesh_id = 1,
+        .texture_id = 1
     });
 
     id = ecs_new(app->registry);
@@ -158,7 +162,9 @@ void app_run(app_t *app)
 
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
         .mesh = asset_manager_get_mesh(app->asset_manager, "cube"),
-        .texture = asset_manager_get_texture(app->asset_manager, "dog")
+        .texture = asset_manager_get_texture(app->asset_manager, "dog"),
+        .mesh_id = 0,
+        .texture_id = 0
     });
 
     while (app->window->open) {

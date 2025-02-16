@@ -59,6 +59,9 @@ typedef size_t usize;
 // array count macro
 #define ARR_LEN(arr) (usize)(sizeof(arr) / sizeof(arr[0]))
 
+// switch bool macro
+#define SWITCH_BOOL(b) (*(b) = !*(b))
+
 // glm types
 typedef vec2 v2;
 typedef vec3 v3;

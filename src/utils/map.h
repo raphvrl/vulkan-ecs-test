@@ -7,17 +7,12 @@
 #define INITAL_CAPACITY 8
 #define GROWTH_FACTOR 2
 
-typedef struct pair {
-    char key[256];
-    void *value;
-    bool used;
-} pair_t;
-
 // main struct
 typedef struct map {
-    pair_t *pairs;
-    usize size;
+    char **keys;
+    void **values;
     usize capacity;
+    usize size;
 } map_t;
 
 // constructor and destructor
@@ -30,7 +25,5 @@ void map_remove(map_t *map, const char *key);
 void *map_get(map_t *map, const char *key);
 const char *map_get_key(map_t *map, usize i);
 
-#define map_pair(map, i) (&(map)->pairs[i])
-
-// print
-void map_print(map_t *map);
+// macro
+#define map_keys(map) (const char * const *)(map)->keys

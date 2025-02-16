@@ -7,6 +7,7 @@ bool cimgui_ctx_create(vk_swapchain_t* swapchain)
     igCreateContext(NULL);
 
     ImGuiIO *io = igGetIO();
+    io->IniFilename = "bin/imgui.ini";
     io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     if (!ImGui_ImplGlfw_InitForVulkan(device->window->handle, true)) {

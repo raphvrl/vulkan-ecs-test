@@ -18,14 +18,14 @@ void asset_manager_destroy(asset_manager_t *asset_manager)
 {
     if (!asset_manager) { return; }
 
-    for (usize i = 0; i < asset_manager->textures->capacity; i++) {
-        pair_t *pair = map_pair(asset_manager->textures, i);
-        texture_destroy(pair->value);
+    for (usize i = 0; i < asset_manager->textures->size; i++) {
+        texture_t *value = asset_manager->textures->values[i];
+        texture_destroy(value);
     }
 
     for (usize i = 0; i < asset_manager->meshes->capacity; i++) {
-        pair_t *pair = map_pair(asset_manager->meshes, i);
-        mesh_destroy(pair->value);
+        mesh_t *value = asset_manager->meshes->values[i];
+        mesh_destroy(value);
     }
 
     map_destroy(asset_manager->textures);

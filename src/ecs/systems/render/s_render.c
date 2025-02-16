@@ -89,8 +89,8 @@ static void draw_gui(ecs_t *ecs, pipeline_manager_t *pipeline_manager)
     ImGui_ImplGlfw_NewFrame();
     igNewFrame();
 
-    gui_manager_t *gui_manager = ecs->gui_manager;
-    gui_manager_update(gui_manager);
+    gui_t *gui = ecs->gui;
+    gui_render(gui);
 
     igRender();
     ImGui_ImplVulkan_RenderDrawData(igGetDrawData(), command_buffer, VK_NULL_HANDLE);

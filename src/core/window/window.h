@@ -26,6 +26,7 @@ typedef struct window {
 
     // keyboard
     bool keys[GLFW_KEY_LAST];
+    bool prev_keys[GLFW_KEY_LAST];
 
     // mouse
     bool mouses[GLFW_MOUSE_BUTTON_LAST];
@@ -202,4 +203,8 @@ void window_close(window_t *win);
 
 // change screen status
 void window_set_fullscreen(window_t *win, bool fullscreen);
+
+// key
+#define window_key_down(win, key) \
+    (win)->keys[key] && !(win)->prev_keys[key]
 
