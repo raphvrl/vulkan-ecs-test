@@ -53,7 +53,7 @@ GLFW_FLAGS = -DGLFW_BUILD_DOCS=OFF \
 			 -DCMAKE_BUILD_TYPE=Release
 
 CFLAGS += -I$(GLFW_INC)
-LDFLAGS += -lglfw3
+LDFLAGS += -L$(GLFW_LIB) -lglfw3
 
 ifeq ($(OS), Windows_NT)
 	GLFW_FLAGS += -DGLFW_BUILD_X11=OFF \
@@ -123,12 +123,12 @@ GLSLC = $(VULKAN_SDK)/Bin/glslc.exe
 SHADER_DIR = shaders
 SHADER_BIN = $(BIN_DIR)/shaders
 SHADER_SRC = $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
-SHADER_DST = $(pathsubst $(SHADER_DIR)/%.vert,$(SHADER_BIN)/%.vert.spv,$(SHADER_SRC)) \
-			 $(pathsubst $(SHADER_DIR)/%.frag,$(SHADER_BIN)/%.frag.spv,$(SHADER_SRC))
+SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
+			 $(SHADER_SRC:$(SHADER_DIR)/%.frag=$(SHADER_BIN)/%.frag.spv)
 
-all: $(TARGET)
+all: $(TARGET) $(SHADER_DST)
 
-$(TARGET): $(OBJ) $(CPP_OBJ) $(SHADER_DST) | $(GLFW_STAMP)
+$(TARGET): $(OBJ) $(CPP_OBJ) | $(GLFW_STAMP)
 	@$(PRINT) "Linking $@"
 	@$(CXX) $^ $(LDFLAGS) -o $@
 

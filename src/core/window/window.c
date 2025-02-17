@@ -154,12 +154,22 @@ void window_set_fullscreen(window_t *win, bool fullscreen)
             mode->refreshRate
         );
     } else {
+        int x = (mode->width - win->w) / 2;
+        int y = (mode->height - win->h) / 2;
+
         glfwSetWindowMonitor(
             win->handle,
             NULL,
-            0, 0,
+            x, y,
             win->w, win->h,
             mode->refreshRate
         );
     }
+}
+
+bool window_is_fullscreen(window_t *win)
+{
+    if (!win) { return false; }
+
+    return glfwGetWindowMonitor(win->handle) != NULL;
 }

@@ -203,8 +203,10 @@ void window_close(window_t *win);
 
 // change screen status
 void window_set_fullscreen(window_t *win, bool fullscreen);
+bool window_is_fullscreen(window_t *win);
+#define window_toggle_fullscreen(win) \
+    window_set_fullscreen(win, !window_is_fullscreen(win))
 
 // key
 #define window_key_down(win, key) \
     (win)->keys[key] && !(win)->prev_keys[key]
-

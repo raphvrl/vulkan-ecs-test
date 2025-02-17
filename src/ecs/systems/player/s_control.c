@@ -79,6 +79,10 @@ static void editor_control(ecs_t *ecs)
     if (window_key_down(ecs->window, K_F1)) {
         SWITCH_BOOL(&ecs->gui->entity_list.active);
     }
+
+    if (ecs->window->keys[K_LEFT_ALT] && window_key_down(ecs->window, K_ENTER)) {
+        window_toggle_fullscreen(ecs->window);
+    }
 }
 
 void s_control_tick(ecs_t *ecs, f32 dt)

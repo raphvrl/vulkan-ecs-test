@@ -32,7 +32,7 @@ app_t *app_create(u32 w, u32 h, const char *title)
         return NULL;
     }
 
-    window_set_fullscreen(app->window, true);
+    window_set_fullscreen(app->window, false);
 
     app->device = vk_device_create(app->window);
     if (!app->device) {

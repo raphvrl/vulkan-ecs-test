@@ -35,7 +35,7 @@ static void draw_c_transform(c_transform_t *transform)
         igText("POSITION");
         igDragFloat3(
             "##position",
-            (float *)&transform->pos,
+            (f32 *)&transform->pos,
             0.1f,
             -FLT_MAX,
             FLT_MAX,
@@ -46,7 +46,7 @@ static void draw_c_transform(c_transform_t *transform)
         igText("ROTATION");
         igDragFloat3(
             "##rotation",
-            (float *)&transform->rotate,
+            (f32 *)&transform->rotate,
             0.1f,
             -FLT_MAX,
             FLT_MAX,
@@ -57,7 +57,7 @@ static void draw_c_transform(c_transform_t *transform)
         igText("SCALE");
         igDragFloat3(
             "##scale",
-            (float *)&transform->scale,
+            (f32 *)&transform->scale,
             0.1f,
             -FLT_MAX,
             FLT_MAX,
