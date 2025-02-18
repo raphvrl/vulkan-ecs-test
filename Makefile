@@ -109,9 +109,7 @@ CXXFLAGS = $(CFLAGS) \
 		   -fpermissive \
 		   -DIMGUI_IMPL_API="extern \"C\"" \
 		   -DCIMGUI_USE_GLFW \
-		   -DCIMGUI_USE_VULKAN \
-		   -DIMGUI_DISABLE_OBSOLETE_FUNCTIONS \
-		   -x c++
+		   -DCIMGUI_USE_VULKAN
 
 LDFLAGS += -lstdc++
 
@@ -136,12 +134,12 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(CC) $(CFLAGS) -MM $< > $(BIN_DIR)/$*.d
 
 $(BIN_DIR)/%.o: %.cpp
-	@$(PRINT) "Compiling $<"
+	@$(PRINT) "Compiling $< -> $@"
 	@$(MKDIR) $(@D)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(SHADER_BIN)/%.vert.spv: $(SHADER_DIR)/%.vert | $(BIN_DIR)
-	@$(PRINT) "Compiling $<"
+	@$(PRINT) "Compiling $< -> $@"
 	@$(MKDIR) $(@D)
 	@$(GLSLC) $< -o $@
 
