@@ -8,7 +8,7 @@ ifeq ($(OS), Windows_NT)
 		MKDIR = mkdir -p
 		PRINT = echo
 
-		CMAKE = cmake -G "Unix Makefiles"
+		CMAKE = cmake -G "MinGW Makefiles"
 	else
 		$(error "only support MSYS2 for Windows")
 	endif
@@ -56,9 +56,6 @@ CFLAGS += -I$(GLFW_INC)
 LDFLAGS += -L$(GLFW_LIB) -lglfw3
 
 ifeq ($(OS), Windows_NT)
-	GLFW_FLAGS += -DGLFW_BUILD_X11=OFF \
-				  -DGLFW_BUILD_WIN32=ON
-
 	LDFLAGS += -lgdi32 -luser32 -lshell32 -lkernel32
 endif
 
