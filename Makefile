@@ -7,6 +7,7 @@ ifeq ($(OS), Windows_NT)
 		RM = rm -fr
 		MKDIR = mkdir -p
 		PRINT = echo
+		TOUCH = touch
 
 		CMAKE = cmake -G "MinGW Makefiles"
 	else
@@ -110,6 +111,22 @@ CXXFLAGS += -fpermissive \
 		   -DCIMGUI_USE_GLFW \
 		   -DCIMGUI_USE_VULKAN
 
+# joltc
+
+JOLTC_DIR = $(LIB_DIR)/joltc
+JOLTC_BIN = $(BIN_DIR)/joltc
+JOLTC_INC = $(JOLTC_DIR)/include
+JOLTC_STAMP = $(JOLTC_BIN)/.stamp
+
+CFLAGS += -I$(JOLTC_INC)
+
+JOLT_FLAGS = -DJOLTC_BUILD_STATIC=ON \
+			 -DJOLTC_BUILD_TESTS=OFF \
+			 -DCMAKE_BUILD_TYPE=Release
+
+CFLAGS += -I$(JOLTC_DIR)/include
+LDFLAGS += -L$(JOLTC_BIN) -lJoltC
+
 CPP_OBJ = $(patsubst %.cpp,$(BIN_DIR)/%.o,$(CPP_SRC))
 
 CXXFLAGS += $(CFLAGS)
@@ -123,9 +140,9 @@ SHADER_SRC = $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
 			 $(SHADER_SRC:$(SHADER_DIR)/%.frag=$(SHADER_BIN)/%.frag.spv)
 
-all: $(TARGET) $(SHADER_DST)
+all: $(GLFW_STAMP) $(JOLT_STAMP) $(TARGET) $(SHADER_DST)
 
-$(TARGET): $(OBJ) $(CPP_OBJ) | $(GLFW_STAMP)
+$(TARGET): $(OBJ) $(CPP_OBJ)
 	@$(PRINT) "Linking $@"
 	@$(CXX) $^ $(LDFLAGS) -o $@
 
@@ -155,7 +172,18 @@ $(GLFW_STAMP): | $(BIN_DIR)
 	@$(MKDIR) $(GLFW_BIN)
 	@$(CMAKE) -S $(GLFW_DIR) -B $(GLFW_BIN) $(GLFW_FLAGS)
 	@$(MAKE) -C $(GLFW_BIN)
-	@$(shell touch $@)
+	@$(TOUCH) $@
+
+glfw: $(GLFW_STAMP)
+
+$(JOLT_STAMP): | $(BIN_DIR)
+	@$(PRINT) "Building JoltC"
+	@$(MKDIR) $(JOLTC_BIN)
+	@$(CMAKE) -S $(JOLTC_DIR) -B $(JOLTC_BIN) $(JOLT_FLAGS)
+	@$(MAKE) -C $(JOLTC_BIN)
+	@$(TOUCH) $@
+
+joltc: $(JOLT_STAMP)
 
 $(BIN_DIR):
 	@$(MKDIR) $(BIN_DIR)
@@ -170,17 +198,17 @@ clean-glfw:
 	@$(PRINT) "Cleaning GLFW"
 	@$(RM) $(GLFW_BIN)
 
-clean-cimgui:
-	@$(PRINT) "Cleaning CImGui"
-	@$(RM) $(CIMGUI_BIN)
+clean-joltc:
+	@$(PRINT) "Cleaning JoltC"
+	@$(RM) $(JOLTC_BIN)
 
 clean-lib:
 	@$(PRINT) "Cleaning lib"
 	@$(RM) $(GLFW_BIN)
-	@$(RM) $(CIMGUI_BIN)
+	@$(RM) $(JOLTC_BIN)
 
 clean-all:
 	@$(PRINT) "Cleaning all"
 	@$(RM) $(BIN_DIR)
 
-.PHONY: all clean clean-all
+.PHONY: all clean clean-all clean-code clean-glfw clean-joltc clean-lib glfw joltc
