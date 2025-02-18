@@ -90,7 +90,7 @@ BACKEND_DIR = $(IMGUI_DIR)/backends
 CIMGUI_BIN = $(BIN_DIR)/cimgui
 CIMGUI_STAMP = $(CIMGUI_BIN)/.stamp
 
-CPP_SRC = $(CIMGUI_DIR)/cimgui.cpp \
+CIMGUI_SRC = $(CIMGUI_DIR)/cimgui.cpp \
 		  $(IMGUI_DIR)/imgui.cpp \
 		  $(IMGUI_DIR)/imgui_demo.cpp \
 		  $(IMGUI_DIR)/imgui_draw.cpp \
@@ -99,18 +99,20 @@ CPP_SRC = $(CIMGUI_DIR)/cimgui.cpp \
 		  $(BACKEND_DIR)/imgui_impl_vulkan.cpp \
 		  $(BACKEND_DIR)/imgui_impl_glfw.cpp
 
-CPP_OBJ = $(CPP_SRC:%.cpp=$(BIN_DIR)/%.o)
+CPP_SRC += $(CIMGUI_SRC)
 
 CFLAGS += -I$(CIMGUI_DIR) \
 	 	  -I$(IMGUI_DIR) \
 		  -I$(BACKEND_DIR)
 
-CXXFLAGS = $(CFLAGS) \
-		   -fpermissive \
+CXXFLAGS += -fpermissive \
 		   -DIMGUI_IMPL_API="extern \"C\"" \
 		   -DCIMGUI_USE_GLFW \
 		   -DCIMGUI_USE_VULKAN
 
+CPP_OBJ = $(patsubst %.cpp,$(BIN_DIR)/%.o,$(CPP_SRC))
+
+CXXFLAGS += $(CFLAGS)
 LDFLAGS += -lstdc++
 
 # shader
