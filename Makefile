@@ -110,21 +110,9 @@ CXXFLAGS += -fpermissive \
 		   -DCIMGUI_USE_GLFW \
 		   -DCIMGUI_USE_VULKAN
 
-# bullet
-BULLET_DIR = $(LIB_DIR)/bullet
-BULLET_BIN = $(BIN_DIR)/bullet
-BULLET_INC = $(BULLET_DIR)/src
-BULLET_STAMP = $(BULLET_BIN)/.stamp
+# bulletCapy
 
-BULLET_FLAGS = -DBUILD_SHARED_LIBS=OFF \
-			   -DUSE_MSVC_RUNTIME_LIBRARY_DLL=OFF \
-			   -DBUILD_CPU_DEMOS=OFF \
-			   -DBUILD_OPENGL3_DEMOS=OFF \
-			   -DBUILD_BULLET2_DEMOS=OFF \
-			   -DBUILD_EXTRAS=OFF \
-			   -DBUILD_UNIT_TESTS=OFF \
-			   -DUSE_DOUBLE_PRECISION=OFF \
-			   -DCMAKE_BUILD_TYPE=Release
+
 
 CFLAGS += -I$(BULLET_INC)
 LDFLAGS += -L$(BULLET_BIN)/lib -lBulletDynamics -lBulletCollision -lLinearMath
