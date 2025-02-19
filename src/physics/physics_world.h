@@ -1,7 +1,5 @@
 #pragma once
 
-#include <btBulletDynamicsCommon.h>
-
 #include "core/types.h"
 
 typedef struct physics_world {
