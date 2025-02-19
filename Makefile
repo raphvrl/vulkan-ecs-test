@@ -89,7 +89,6 @@ CIMGUI_DIR = $(LIB_DIR)/cimgui
 IMGUI_DIR = $(CIMGUI_DIR)/imgui
 BACKEND_DIR = $(IMGUI_DIR)/backends
 CIMGUI_BIN = $(BIN_DIR)/cimgui
-CIMGUI_STAMP = $(CIMGUI_BIN)/.stamp
 
 CIMGUI_SRC = $(CIMGUI_DIR)/cimgui.cpp \
 		  $(IMGUI_DIR)/imgui.cpp \
@@ -111,21 +110,24 @@ CXXFLAGS += -fpermissive \
 		   -DCIMGUI_USE_GLFW \
 		   -DCIMGUI_USE_VULKAN
 
-# joltc
+# bullet
+BULLET_DIR = $(LIB_DIR)/bullet
+BULLET_BIN = $(BIN_DIR)/bullet
+BULLET_INC = $(BULLET_DIR)/src
+BULLET_STAMP = $(BULLET_BIN)/.stamp
 
-JOLTC_DIR = $(LIB_DIR)/joltc
-JOLTC_BIN = $(BIN_DIR)/joltc
-JOLTC_INC = $(JOLTC_DIR)/include
-JOLTC_STAMP = $(JOLTC_BIN)/.stamp
+BULLET_FLAGS = -DBUILD_SHARED_LIBS=OFF \
+			   -DUSE_MSVC_RUNTIME_LIBRARY_DLL=OFF \
+			   -DBUILD_CPU_DEMOS=OFF \
+			   -DBUILD_OPENGL3_DEMOS=OFF \
+			   -DBUILD_BULLET2_DEMOS=OFF \
+			   -DBUILD_EXTRAS=OFF \
+			   -DBUILD_UNIT_TESTS=OFF \
+			   -DUSE_DOUBLE_PRECISION=OFF \
+			   -DCMAKE_BUILD_TYPE=Release
 
-CFLAGS += -I$(JOLTC_INC)
-
-JOLT_FLAGS = -DJOLTC_BUILD_STATIC=ON \
-			 -DJOLTC_BUILD_TESTS=OFF \
-			 -DCMAKE_BUILD_TYPE=Release
-
-CFLAGS += -I$(JOLTC_DIR)/include
-LDFLAGS += -L$(JOLTC_BIN) -lJoltC
+CFLAGS += -I$(BULLET_INC)
+LDFLAGS += -L$(BULLET_BIN)/lib -lBulletDynamics -lBulletCollision -lLinearMath
 
 CPP_OBJ = $(patsubst %.cpp,$(BIN_DIR)/%.o,$(CPP_SRC))
 
@@ -140,7 +142,7 @@ SHADER_SRC = $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
 			 $(SHADER_SRC:$(SHADER_DIR)/%.frag=$(SHADER_BIN)/%.frag.spv)
 
-all: $(GLFW_STAMP) $(JOLT_STAMP) $(TARGET) $(SHADER_DST)
+all: $(GLFW_STAMP) $(BULLET_STAMP) $(TARGET) $(SHADER_DST)
 
 $(TARGET): $(OBJ) $(CPP_OBJ)
 	@$(PRINT) "Linking $@"
@@ -176,14 +178,14 @@ $(GLFW_STAMP): | $(BIN_DIR)
 
 glfw: $(GLFW_STAMP)
 
-$(JOLT_STAMP): | $(BIN_DIR)
-	@$(PRINT) "Building JoltC"
-	@$(MKDIR) $(JOLTC_BIN)
-	@$(CMAKE) -S $(JOLTC_DIR) -B $(JOLTC_BIN) $(JOLT_FLAGS)
-	@$(MAKE) -C $(JOLTC_BIN)
+$(BULLET_STAMP): | $(BIN_DIR)
+	@$(PRINT) "Building Bullet"
+	@$(MKDIR) $(BULLET_BIN)
+	@$(CMAKE) -S $(BULLET_DIR) -B $(BULLET_BIN) $(BULLET_FLAGS)
+	@$(MAKE) -C $(BULLET_BIN)
 	@$(TOUCH) $@
 
-joltc: $(JOLT_STAMP)
+bullet: $(BULLET_STAMP)
 
 $(BIN_DIR):
 	@$(MKDIR) $(BIN_DIR)
@@ -198,9 +200,9 @@ clean-glfw:
 	@$(PRINT) "Cleaning GLFW"
 	@$(RM) $(GLFW_BIN)
 
-clean-joltc:
-	@$(PRINT) "Cleaning JoltC"
-	@$(RM) $(JOLTC_BIN)
+clean-bullet:
+	@$(PRINT) "Cleaning Bullet"
+	@$(RM) $(BULLET_BIN)
 
 clean-lib:
 	@$(PRINT) "Cleaning lib"

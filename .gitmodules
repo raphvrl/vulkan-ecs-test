@@ -13,6 +13,6 @@
 [submodule "lib/cimgui"]
 	path = lib/cimgui
 	url = https://github.com/raphvrl/cimgui.git
-[submodule "lib/joltc"]
-	path = lib/joltc
-	url = https://github.com/amerkoleci/joltc.git
+[submodule "lib/bullet"]
+	path = lib/bullet
+	url = https://github.com/bulletphysics/bullet3.git
