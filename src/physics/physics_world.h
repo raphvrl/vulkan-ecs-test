@@ -1,9 +1,11 @@
 #pragma once
 
+#include <capi.h>
+
 #include "core/types.h"
 
 typedef struct physics_world {
-    
+    void *universe;
 } physics_world_t;
 
 physics_world_t *physics_world_create();

@@ -24,7 +24,7 @@ LIB_DIR = lib
 SRC = $(shell find $(SRC_DIR) -name "*.c")
 
 OBJ = $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.o,$(SRC))
-DEP = $(pathsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.d,$(SRC))
+DEP = $(patsubst $(SRC_DIR)/%.c,$(BIN_DIR)/%.d,$(SRC))
 
 CFLAGS = -I$(SRC_DIR)
 
@@ -99,7 +99,7 @@ CIMGUI_SRC = $(CIMGUI_DIR)/cimgui.cpp \
 		  	 $(BACKEND_DIR)/imgui_impl_vulkan.cpp \
 		  	 $(BACKEND_DIR)/imgui_impl_glfw.cpp
 
-CIMGUI_OBJ = $(CIMGUI_SRC:$(CIMGUI_DIR)/%.cpp=$(CIMGUI_BIN)/%.o)
+CIMGUI_OBJ = $(patsubst $(CIMGUI_DIR)/%.cpp,$(CIMGUI_BIN)/%.o,$(CIMGUI_SRC))
 
 CIMGUI_FLAGS = $(CFLAGS) \
 			   -fPIC \
@@ -171,13 +171,16 @@ $(CIMGUI_BIN)/%.o: $(CIMGUI_DIR)/%.cpp | $(CIMGUI_BIN)
 	@$(MKDIR) $(@D)
 	@$(CXX) $(CIMGUI_FLAGS) -c $< -o $@
 
+$(CIMGUI_BIN):
+	@$(MKDIR) $(CIMGUI_BIN)
+
 $(CIMGUI_LIB): $(CIMGUI_OBJ)
 	@$(PRINT) "Building CImGui"
 	@$(AR) $@ $^
 
 bulletcapi:
 	@$(PRINT) "Building Bullet"
-	@$(MAKE) -C $(BULLETCAPI_DIR) capi.a
+	@$(MAKE) -C $(BULLETCAPI_DIR) lib/libbullet.a
 
 $(BIN_DIR):
 	@$(MKDIR) $(BIN_DIR)
@@ -198,7 +201,7 @@ clean-cimgui:
 
 clean-bulletcapi:
 	@$(PRINT) "Cleaning Bullet"
-	@$(MAKE) -C $(BULLETCAPI_DIR) clean
+	@$(MAKE) -C $(BULLETCAPI_DIR) cleanall
 
 
 clean-lib: clean-glfw clean-cimgui clean-bulletcapi
