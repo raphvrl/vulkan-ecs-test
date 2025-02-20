@@ -65,7 +65,6 @@ VULKAN_INC = $(VULKAN_SDK)/Include
 VULKAN_LIB = $(VULKAN_SDK)/Lib
 
 CFLAGS += -I$(VULKAN_INC)
-LDFLAGS += -L$(VULKAN_LIB) -lvulkan-1
 
 # cglm
 CGLM_DIR = $(LIB_DIR)/cglm
@@ -133,11 +132,13 @@ SHADER_SRC = $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
 			 $(SHADER_SRC:$(SHADER_DIR)/%.frag=$(SHADER_BIN)/%.frag.spv)
 
-all: $(GLFW_STAMP) bulletcapi cimgui $(TARGET) $(SHADER_DST)
+LDFLAGS += -L$(VULKAN_LIB) -lvulkan-1
+
+all: glfw bulletcapi cimgui $(TARGET) $(SHADER_DST)
 
 $(TARGET): $(OBJ) $(CPP_OBJ)
 	@$(PRINT) "Linking $@"
-	@$(CXX) $^ -o $@ $(LDFLAGS) -lvulkan-1
+	@$(CXX) $^ -o $@ $(LDFLAGS)
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(PRINT) "Compiling $< -> $@"
@@ -191,11 +192,16 @@ clean-glfw:
 	@$(PRINT) "Cleaning GLFW"
 	@$(RM) $(GLFW_BIN)
 
+clean-cimgui:
+	@$(PRINT) "Cleaning CImGui"
+	@$(RM) $(CIMGUI_BIN)
+
 clean-bulletcapi:
 	@$(PRINT) "Cleaning Bullet"
 	@$(MAKE) -C $(BULLETCAPI_DIR) clean
 
-clean-lib: clean-glfw clean-bulletcapi
+
+clean-lib: clean-glfw clean-cimgui clean-bulletcapi
 
 clean-all: clean-lib
 	@$(PRINT) "Cleaning all"
