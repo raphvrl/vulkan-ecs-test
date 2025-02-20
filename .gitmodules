@@ -13,4 +13,6 @@
 [submodule "lib/cimgui"]
 	path = lib/cimgui
 	url = https://github.com/raphvrl/cimgui.git
-
+[submodule "lib/bulletCapi"]
+	path = lib/bulletCAPI
+	url = https://github.com/chriscamacho/bulletCapi.git
