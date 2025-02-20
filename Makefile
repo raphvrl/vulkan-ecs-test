@@ -9,7 +9,7 @@ ifeq ($(OS), Windows_NT)
 		PRINT = echo
 		TOUCH = touch
 
-		CMAKE = cmake -G "MinGW Makefiles"
+		CMAKE = cmake -G "MSYS Makefiles"
 	else
 		$(error "only support MSYS2 for Windows")
 	endif
@@ -89,37 +89,40 @@ CIMGUI_DIR = $(LIB_DIR)/cimgui
 IMGUI_DIR = $(CIMGUI_DIR)/imgui
 BACKEND_DIR = $(IMGUI_DIR)/backends
 CIMGUI_BIN = $(BIN_DIR)/cimgui
+CIMGUI_LIB = $(CIMGUI_BIN)/libcimgui.a
 
 CIMGUI_SRC = $(CIMGUI_DIR)/cimgui.cpp \
-		  $(IMGUI_DIR)/imgui.cpp \
-		  $(IMGUI_DIR)/imgui_demo.cpp \
-		  $(IMGUI_DIR)/imgui_draw.cpp \
-		  $(IMGUI_DIR)/imgui_tables.cpp \
-		  $(IMGUI_DIR)/imgui_widgets.cpp \
-		  $(BACKEND_DIR)/imgui_impl_vulkan.cpp \
-		  $(BACKEND_DIR)/imgui_impl_glfw.cpp
+			 $(IMGUI_DIR)/imgui.cpp \
+			 $(IMGUI_DIR)/imgui_demo.cpp \
+		  	 $(IMGUI_DIR)/imgui_draw.cpp \
+		  	 $(IMGUI_DIR)/imgui_tables.cpp \
+		  	 $(IMGUI_DIR)/imgui_widgets.cpp \
+		  	 $(BACKEND_DIR)/imgui_impl_vulkan.cpp \
+		  	 $(BACKEND_DIR)/imgui_impl_glfw.cpp
 
-CPP_SRC += $(CIMGUI_SRC)
+CIMGUI_OBJ = $(CIMGUI_SRC:$(CIMGUI_DIR)/%.cpp=$(CIMGUI_BIN)/%.o)
+
+CIMGUI_FLAGS = $(CFLAGS) \
+			   -fPIC \
+               -DIMGUI_IMPL_API="extern \"C\"" \
+               -DCIMGUI_USE_GLFW \
+               -DCIMGUI_USE_VULKAN \
+			   -I$(IMGUI_DIR) \
+			   -I$(BACKEND_DIR) \
 
 CFLAGS += -I$(CIMGUI_DIR) \
-	 	  -I$(IMGUI_DIR) \
+		  -I$(IMGUI_DIR) \
 		  -I$(BACKEND_DIR)
 
-CXXFLAGS += -fpermissive \
-		   -DIMGUI_IMPL_API="extern \"C\"" \
-		   -DCIMGUI_USE_GLFW \
-		   -DCIMGUI_USE_VULKAN
+LDFLAGS += -L$(CIMGUI_BIN) -lcimgui
 
-# bulletCapy
+# bulletCapi
+BULLETCAPI_DIR = $(LIB_DIR)/bulletCapi/capi
+BULLETCAPI_LIB = $(BULLETCAPI_DIR)/lib
 
+CFLAGS += -I$(BULLETCAPI_DIR)
+LDFLAGS += -L$(BULLETCAPI_LIB) -lbullet
 
-
-CFLAGS += -I$(BULLET_INC)
-LDFLAGS += -L$(BULLET_BIN)/lib -lBulletDynamics -lBulletCollision -lLinearMath
-
-CPP_OBJ = $(patsubst %.cpp,$(BIN_DIR)/%.o,$(CPP_SRC))
-
-CXXFLAGS += $(CFLAGS)
 LDFLAGS += -lstdc++
 
 # shader
@@ -130,22 +133,16 @@ SHADER_SRC = $(shell find $(SHADER_DIR) -name "*.vert" -o -name "*.frag")
 SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
 			 $(SHADER_SRC:$(SHADER_DIR)/%.frag=$(SHADER_BIN)/%.frag.spv)
 
-all: $(GLFW_STAMP) $(BULLET_STAMP) $(TARGET) $(SHADER_DST)
+all: $(GLFW_STAMP) bulletcapi cimgui $(TARGET) $(SHADER_DST)
 
 $(TARGET): $(OBJ) $(CPP_OBJ)
 	@$(PRINT) "Linking $@"
-	@$(CXX) $^ $(LDFLAGS) -o $@
+	@$(CXX) $^ -o $@ $(LDFLAGS) -lvulkan-1
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(PRINT) "Compiling $< -> $@"
 	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
-	@$(CC) $(CFLAGS) -MM $< > $(BIN_DIR)/$*.d
-
-$(BIN_DIR)/%.o: %.cpp
-	@$(PRINT) "Compiling $< -> $@"
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -MMD -c $< -o $@
 
 $(SHADER_BIN)/%.vert.spv: $(SHADER_DIR)/%.vert | $(BIN_DIR)
 	@$(PRINT) "Compiling $< -> $@"
@@ -166,14 +163,20 @@ $(GLFW_STAMP): | $(BIN_DIR)
 
 glfw: $(GLFW_STAMP)
 
-$(BULLET_STAMP): | $(BIN_DIR)
-	@$(PRINT) "Building Bullet"
-	@$(MKDIR) $(BULLET_BIN)
-	@$(CMAKE) -S $(BULLET_DIR) -B $(BULLET_BIN) $(BULLET_FLAGS)
-	@$(MAKE) -C $(BULLET_BIN)
-	@$(TOUCH) $@
+cimgui: $(CIMGUI_LIB)
 
-bullet: $(BULLET_STAMP)
+$(CIMGUI_BIN)/%.o: $(CIMGUI_DIR)/%.cpp | $(CIMGUI_BIN)
+	@$(PRINT) "Compiling $< -> $@"
+	@$(MKDIR) $(@D)
+	@$(CXX) $(CIMGUI_FLAGS) -c $< -o $@
+
+$(CIMGUI_LIB): $(CIMGUI_OBJ)
+	@$(PRINT) "Building CImGui"
+	@$(AR) $@ $^
+
+bulletcapi:
+	@$(PRINT) "Building Bullet"
+	@$(MAKE) -C $(BULLETCAPI_DIR) capi.a
 
 $(BIN_DIR):
 	@$(MKDIR) $(BIN_DIR)
@@ -188,16 +191,13 @@ clean-glfw:
 	@$(PRINT) "Cleaning GLFW"
 	@$(RM) $(GLFW_BIN)
 
-clean-bullet:
+clean-bulletcapi:
 	@$(PRINT) "Cleaning Bullet"
-	@$(RM) $(BULLET_BIN)
+	@$(MAKE) -C $(BULLETCAPI_DIR) clean
 
-clean-lib:
-	@$(PRINT) "Cleaning lib"
-	@$(RM) $(GLFW_BIN)
-	@$(RM) $(JOLTC_BIN)
+clean-lib: clean-glfw clean-bulletcapi
 
-clean-all:
+clean-all: clean-lib
 	@$(PRINT) "Cleaning all"
 	@$(RM) $(BIN_DIR)
 
