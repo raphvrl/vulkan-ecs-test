@@ -6,6 +6,7 @@
 #include "core/window/window.h"
 #include "graphics/pipeline_manager.h"
 #include "graphics/gui.h"
+#include "physics/physics_world.h"
 
 // info struct
 typedef struct ecs_info {
@@ -25,6 +26,7 @@ typedef struct ecs {
     pipeline_manager_t *pipeline_manager;
 
     gui_t *gui;
+    physics_world_t *physics_world;
 } ecs_t;
 
 // systems

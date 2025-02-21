@@ -66,6 +66,12 @@ app_t *app_create(u32 w, u32 h, const char *title)
         "monkey"
     );
 
+    asset_manager_load_mesh(
+        app->asset_manager,
+        "assets/mesh/plane.glb",
+        "plane"
+    );
+
     asset_manager_load_texture(
         app->asset_manager,
         "assets/texture/dog.jpg",
@@ -95,6 +101,9 @@ app_t *app_create(u32 w, u32 h, const char *title)
     app->gui = gui_create(app->ecs, app->asset_manager);
     app->ecs->gui = app->gui;
 
+    app->physics_world = physics_world_create();
+    app->ecs->physics_world = app->physics_world;
+
     return app;
 }
 
@@ -106,6 +115,7 @@ void app_destroy(app_t *app)
 
     vkDeviceWaitIdle(app->device->device);
 
+    physics_world_destroy(app->physics_world);
     gui_destroy(app->gui);
 
     asset_manager_destroy(app->asset_manager);
@@ -125,12 +135,23 @@ void app_destroy(app_t *app)
 void app_run(app_t *app)
 {
     u32 id = ecs_new(app->registry);
-    ecs_add(app->ecs, id, C_TRANSFORM, &DEFAULT_TRANSFORM);
+    ecs_add(app->ecs, id, C_TRANSFORM, &(c_transform_t){
+        .pos = {0.0f, 5.0f, 0.0f},
+        .scale = {1.0f, 1.0f, 1.0f}
+    });
     ecs_add(app->ecs, id, C_MODEL, &(c_model_t){
         .mesh = asset_manager_get_mesh(app->asset_manager, "monkey"),
         .texture = asset_manager_get_texture(app->asset_manager, "gru"),
         .mesh_id = 1,
         .texture_id = 1
+    });
+
+    ecs_add(app->ecs, id, C_DYNAMIC, &(c_dynamic_t){
+        .mass = 100.0f,
+        .friction = 0.5f,
+        .bounce = 0.5f,
+        .is_static = false,
+        .mesh = asset_manager_get_mesh(app->asset_manager, "monkey")
     });
 
     id = ecs_new(app->registry);
@@ -165,6 +186,14 @@ void app_run(app_t *app)
         .texture = asset_manager_get_texture(app->asset_manager, "dog"),
         .mesh_id = 0,
         .texture_id = 0
+    });
+
+    ecs_add(app->ecs, id, C_DYNAMIC, &(c_dynamic_t){
+        .mass = 1.0f,
+        .friction = 0.5f,
+        .bounce = 0.5f,
+        .is_static = true,
+        .mesh = asset_manager_get_mesh(app->asset_manager, "cube"),
     });
 
     while (app->window->open) {

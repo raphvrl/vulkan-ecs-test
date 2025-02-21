@@ -18,7 +18,9 @@ typedef struct mesh {
 
     vk_buffer_t *vertex_buffer;
     vk_buffer_t *index_buffer;
+    vertex_t *vertices;
     u32 vertex_count;
+    u32 *indices;
     u32 index_count;
     VkVertexInputBindingDescription binding_description;
     VkVertexInputAttributeDescription attribute_descriptions[3];

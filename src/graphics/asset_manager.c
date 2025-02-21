@@ -88,7 +88,11 @@ static mesh_t *load_gltf_mesh(asset_manager_t *asset_manager, const char *path)
         index_count = prim->indices->count;
     }
 
-    vertex_t vertices[vertex_count];
+    vertex_t *vertices = calloc(vertex_count, sizeof(vertex_t));
+    if (!vertices) {
+        LOG_ERROR("Failed to allocate memory for vertices");
+        return NULL;
+    }
     
     for (usize i = 0; i < prim->attributes_count; i++) {
         cgltf_attribute *attr = &prim->attributes[i];
@@ -124,7 +128,12 @@ static mesh_t *load_gltf_mesh(asset_manager_t *asset_manager, const char *path)
         }
     }
 
-    u32 indices[index_count];
+    u32 *indices = calloc(index_count, sizeof(u32));
+    if (!indices) {
+        LOG_ERROR("Failed to allocate memory for indices");
+        return NULL;
+    }
+
     if (prim->indices) {
         cgltf_accessor *accessor = prim->indices;
         void *buffer_data = (uint8_t*)accessor->buffer_view->buffer->data + 

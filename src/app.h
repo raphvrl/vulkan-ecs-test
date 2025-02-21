@@ -12,6 +12,7 @@
 #include "graphics/asset_manager.h"
 #include "graphics/cimgui/cimgui_ctx.h"
 #include "graphics/gui.h"
+#include "physics/physics_world.h"
 
 // main struct
 typedef struct app {
@@ -22,6 +23,7 @@ typedef struct app {
     pipeline_manager_t *pipeline_manager;
     asset_manager_t *asset_manager;
     gui_t  *gui;
+    physics_world_t *physics_world;
 
     component_manager_t *component_manager;
     registry_t *registry;

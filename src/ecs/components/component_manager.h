@@ -8,18 +8,20 @@
 // component
 #include "physics/c_transform.h"
 #include "physics/c_velocity.h"
+#include "physics/c_dynamic.h"
 #include "render/c_model.h"
 #include "render/c_camera.h"
 
 // const
-#define COMPONENT_LIST_NBR 4
+#define COMPONENT_LIST_NBR 5
 
 // enum
 typedef enum component_type {
     C_TRANSFORM,
     C_VELOCITY,
     C_MODEL,
-    C_CAMERA
+    C_CAMERA,
+    C_DYNAMIC,
 } component_type_e;
 
 // component list

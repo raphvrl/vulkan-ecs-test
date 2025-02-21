@@ -11,6 +11,7 @@ component_manager_t *component_manager_create()
     _init_component(manager, c_velocity_t, C_VELOCITY);
     _init_component(manager, c_model_t, C_MODEL);
     _init_component(manager, c_camera_t, C_CAMERA);
+    _init_component(manager, c_dynamic_t, C_DYNAMIC);
 
     return manager;
 }

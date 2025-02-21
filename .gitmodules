@@ -19,3 +19,6 @@
 [submodule "lib/bullet3"]
 	path = lib/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
+[submodule "lib/ode"]
+	path = lib/ode
+	url = https://github.com/thomasmarsh/ODE.git

@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := all
+
 ifeq ($(OS), Windows_NT)
 	ifdef MSYSTEM
 		CC = gcc
@@ -30,12 +32,10 @@ CFLAGS = -I$(SRC_DIR)
 
 -include $(DEP)
 
-TARGET = app
-
 ifeq ($(OS), Windows_NT)
-	TARGET = app.exe
+	TARGET = $(BIN_DIR)/app.exe
 else
-	TARGET = app
+	TARGET = $(BIN_DIR)/app
 endif
 
 # CFLAGS += -Wall -Wextra -Werror
@@ -115,12 +115,25 @@ CFLAGS += -I$(CIMGUI_DIR) \
 
 LDFLAGS += -L$(CIMGUI_BIN) -lcimgui
 
-# bulletCapi
-BULLETCAPI_DIR = $(LIB_DIR)/bulletCapi/capi
-BULLETCAPI_LIB = $(BULLETCAPI_DIR)/lib
+# ode
+ODE_DIR = $(LIB_DIR)/ode
+ODE_INC = $(ODE_DIR)/include
+ODE_BIN = $(BIN_DIR)/ode
+ODE_STAMP = $(ODE_BIN)/.stamp
 
-CFLAGS += -I$(BULLETCAPI_DIR)
-LDFLAGS += -L$(BULLETCAPI_LIB) -lbullet
+ODE_FLAGS = -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_DEMOS=OFF \
+            -DBUILD_TESTS=OFF \
+            -DODE_WITH_DEMOS=OFF \
+            -DODE_WITH_TESTS=OFF \
+            -DODE_WITH_LIBCCD=ON \
+            -DODE_WITH_OPCODE=ON \
+            -DODE_WITH_OU=ON \
+            -DODE_WITH_TRIMESH=ON \
+            -DCMAKE_BUILD_TYPE=Release
+
+CFLAGS += -I$(ODE_INC) -I$(ODE_BIN)/include
+LDFLAGS += -L$(ODE_BIN) -lode_doubles
 
 LDFLAGS += -lstdc++
 
@@ -134,9 +147,9 @@ SHADER_DST = $(SHADER_SRC:$(SHADER_DIR)/%.vert=$(SHADER_BIN)/%.vert.spv) \
 
 LDFLAGS += -L$(VULKAN_LIB) -lvulkan-1
 
-all: glfw bulletcapi cimgui $(TARGET) $(SHADER_DST)
+all: glfw ode cimgui $(TARGET) $(SHADER_DST)
 
-$(TARGET): $(OBJ) $(CPP_OBJ)
+$(TARGET): $(OBJ)
 	@$(PRINT) "Linking $@"
 	@$(CXX) $^ -o $@ $(LDFLAGS)
 
@@ -178,9 +191,14 @@ $(CIMGUI_LIB): $(CIMGUI_OBJ)
 	@$(PRINT) "Building CImGui"
 	@$(AR) $@ $^
 
-bulletcapi:
-	@$(PRINT) "Building Bullet"
-	@$(MAKE) -C $(BULLETCAPI_DIR) lib/libbullet.a
+ode: $(ODE_STAMP)
+
+$(ODE_STAMP): | $(BIN_DIR)
+	@$(PRINT) "Building ODE"
+	@$(MKDIR) $(ODE_BIN)
+	@$(CMAKE) -S $(ODE_DIR) -B $(ODE_BIN) $(ODE_FLAGS)
+	@$(MAKE) -C $(ODE_BIN)
+	@$(TOUCH) $@
 
 $(BIN_DIR):
 	@$(MKDIR) $(BIN_DIR)
@@ -199,15 +217,14 @@ clean-cimgui:
 	@$(PRINT) "Cleaning CImGui"
 	@$(RM) $(CIMGUI_BIN)
 
-clean-bulletcapi:
-	@$(PRINT) "Cleaning Bullet"
-	@$(MAKE) -C $(BULLETCAPI_DIR) cleanall
+clean-ode:
+	@$(PRINT) "Cleaning ODE"
+	@$(RM) $(ODE_BIN)
 
-
-clean-lib: clean-glfw clean-cimgui clean-bulletcapi
+clean-lib: clean-glfw clean-cimgui clean-ode
 
 clean-all: clean-lib
 	@$(PRINT) "Cleaning all"
 	@$(RM) $(BIN_DIR)
 
-.PHONY: all clean clean-all clean-code clean-glfw clean-joltc clean-lib glfw joltc
+.PHONY: all clean-code clean-glfw clean-cimgui clean-ode clean-lib clean-all

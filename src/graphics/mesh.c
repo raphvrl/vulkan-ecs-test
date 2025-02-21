@@ -99,6 +99,8 @@ mesh_t *mesh_create(
     mesh->swapchain = swapchain;
     mesh->vertex_count = vertex_count;
     mesh->index_count = index_count;
+    mesh->vertices = vertices;
+    mesh->indices = indices;
 
     mesh->binding_description = mesh_get_binding_description();
     memcpy(
@@ -118,6 +120,9 @@ void mesh_destroy(mesh_t *mesh)
     if (!mesh) {
         return;
     }
+
+    free(mesh->vertices);
+    free(mesh->indices);
 
     vk_device_t *device = mesh->swapchain->device;
 
